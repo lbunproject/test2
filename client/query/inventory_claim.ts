@@ -25,7 +25,7 @@ export default async function queryClaimInventory(address: string) {
   let collectionsList: CollectionInfo[] = [];
   let collectionAttributes: CollectionAttribute[] = [];
   let tokenList: Media[] = [];
-  let stakeContractAddr = "terra1axajrsh9f52kv784x7r2w09dmlp50482gwssaeppvn4qcwv0yp2qahcmms";
+  let stakeContractAddr = "terra1leqsj8gvgxnasav5ed5lens8j2cq3p0e5qwgulxkqwxqcngetf4qdrhg4l";
 
   const apiEndpoint = "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections.json";
   try {
@@ -100,7 +100,7 @@ export default async function queryClaimInventory(address: string) {
 
         //Info to display
         const earnedRewards = ((Number(collectionAttribute?.reward_amount) / 1000000) * Number(staking_cycles)).toFixed(1)
-        const inDays = '(in ' + String(delay_time.toFixed(0)) + " days)"
+        const inDays = '('+ String(delay_time.toFixed(0)) + " days left)"
 
         tokenList.push({
           tokenId: validClaimNft.token_id,
