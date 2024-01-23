@@ -13,9 +13,17 @@ type CollectionInfo = {
   ownedNFTs?: string[];
 };
 
+type CollectionAttribute = {
+  collectionContract: string;
+  cycle?: number;
+  claim_delay?: number;
+  reward_amount?: string;
+};
+
 export default async function queryStakedInventory(address: string) {
 
   let collectionsList: CollectionInfo[] = [];
+  let collectionAttributes: CollectionAttribute[] = [];
   let tokenList: Media[] = [];
   let stakeContractAddr = "terra1axajrsh9f52kv784x7r2w09dmlp50482gwssaeppvn4qcwv0yp2qahcmms";
 
@@ -40,14 +48,30 @@ export default async function queryStakedInventory(address: string) {
       ownedNFTs: [] // Initialize the owned NFTs array
     }));
 
+    // Fetch additional collection info from the CosmWasm contract
+    const additionalInfoRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/eyJnZXRfY29sbGVjdGlvbnMiOnt9fQ==`);
+    const additionalInfoJson = await additionalInfoRes.json();
+    const additionalInfo = additionalInfoJson.data;
 
+    // Create collectionAttributes array
+    collectionAttributes = collectionsList.map((collection) => {
+      const match = additionalInfo.find((info: any) => info.collection_addr === collection.mintContract);
+      return {
+        collectionContract: collection.mintContract, // Correctly reference the contract
+        cycle: match?.cycle || 0, // Provide default values if not found
+        claim_delay: match?.claim_delay || 0,
+        reward_amount: match?.reward_amount || "",
+      };
+    });
+    
     // Fetch staked NFTs
     let query = Buffer.from(JSON.stringify({ get_stakings_by_owner: { owner: address } })).toString('base64');
     const stakedNftsRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/${query}`);
     const stakedNftsJson = await stakedNftsRes.json();
 
     // Filter valid staked NFTs
-    const validStakedNfts = stakedNftsJson.data.filter((nft: { start_timestamp: any; end_timestamp: string; }) => nft.start_timestamp && nft.end_timestamp === "0");
+    const validStakedNfts = stakedNftsJson.data.filter((nft: { start_timestamp: any; end_timestamp: string; }) =>
+     nft.start_timestamp && nft.end_timestamp === "0");
 
     // Fetch data from blockchain
     for (let validStakedNft of validStakedNfts) {
@@ -59,7 +83,25 @@ export default async function queryStakedInventory(address: string) {
       
       if (myStakedNftsJson && myStakedNftsJson.data.info) {
         const nftInfo = myStakedNftsJson.data.info;
-    
+        let staking_time = ((Date.now() * 1000000) - (validStakedNft.start_timestamp)) / 1000000000; //in seconds
+const x =Date.now()
+        // Find the collection attribute for this NFT
+        const collectionAttribute = collectionAttributes.find(attr => attr.collectionContract === validStakedNft.token_address);
+
+        //Access attributes;   collectionAttribute?.cycle?.toString() ?? "", // Get cycle with Optional Chaining
+        const staking_cycles = staking_time / Number(collectionAttribute?.cycle) ?? 1  //staking cycles
+
+        let delay_time = Number(collectionAttribute?.claim_delay) / (24 * 60 * 60) //in days
+        if (delay_time < 1) {
+          delay_time = 0
+        } else {
+          delay_time = Math.ceil(delay_time)
+        }
+
+        //Info to display
+        const earnedRewards = ((Number(collectionAttribute?.reward_amount) / 1000000) * Number(staking_cycles)).toFixed(1)
+        //const inDays = '(in ' + String(delay_time.toFixed(0)) + " days)"
+
         tokenList.push({
           tokenId: validStakedNft.token_id,
           creator: nftInfo.extension.creator || "Unknown",
@@ -69,7 +111,7 @@ export default async function queryStakedInventory(address: string) {
           description: nftInfo.extension.description || "No description",
           image: nftInfo.extension.image,
           collection: {
-            name: "Staked",
+            name:  'Earned ' + earnedRewards + ' sFROG',
             symbol: "",
             contractAddress: validStakedNft.token_address,
             creator: "",

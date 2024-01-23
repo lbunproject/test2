@@ -5,3 +5,5 @@
 3d2527808c1960a2d199f7eaec1dc91d140d4116 105d5dfd572db3e06f539f5fa67cc3b11f5a1042 ZuluSpl0it <rhenso2000@gmail.com> 1705813772 -0600	commit: staking working
 105d5dfd572db3e06f539f5fa67cc3b11f5a1042 0000000000000000000000000000000000000000 ZuluSpl0it <rhenso2000@gmail.com> 1705870425 -0600	Branch: renamed refs/heads/main to refs/heads/main
 105d5dfd572db3e06f539f5fa67cc3b11f5a1042 105d5dfd572db3e06f539f5fa67cc3b11f5a1042 ZuluSpl0it <rhenso2000@gmail.com> 1705870425 -0600	Branch: renamed refs/heads/main to refs/heads/main
+105d5dfd572db3e06f539f5fa67cc3b11f5a1042 a162c4a655921a214102bdf5b9f6bbddd7565c51 ZuluSpl0it <rhenso2000@gmail.com> 1705898766 -0600	commit: stake and unstake work
+a162c4a655921a214102bdf5b9f6bbddd7565c51 2a056a0cc8bb37ac14972fa44b8bc1fd40cbbdcf ZuluSpl0it <rhenso2000@gmail.com> 1705971297 -0600	commit: added labels for rewards

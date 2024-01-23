@@ -328,70 +328,31 @@ const Trade = () => {
     }
   }, [wallet])
 
-  const handleSendOffer = useCallback(async () => {
-    if (!peerAddress) return
-    if (!peerNfts || !userNfts) return
-    if (selectedUserNfts.size < 1) return
-    if (selectedPeerNfts.size < 1) return
-
-    const msg = {
-      create_offer: {
-        peer: peerAddress,
-        offered_nfts: userNfts
-          ?.filter((nft) => selectedUserNfts.has(getNftMod(nft)))
-          .map((nft) => {
-            return {
-              collection: String(nft.collection.contractAddress),
-              token_id: parseInt(nft.tokenId),
-            }
-          }),
-        wanted_nfts: peerNfts
-          ?.filter((nft) => selectedPeerNfts.has(getNftMod(nft)))
-          .map((nft) => {
-            return {
-              collection: String(nft.collection.contractAddress),
-              token_id: parseInt(nft.tokenId),
-            }
-          }),
-      },
-    }
-
-    const wasmMsg = {
-      typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-      value: MsgExecuteContract.fromPartial({
-        sender: wallet?.address,
-        msg: toUtf8(JSON.stringify(msg)),
-        contract: CONTRACT_ADDRESS,
-      }),
-    }
-
-    const msgs = [/*
-      ...userNfts
-        ?.filter((nft) => selectedUserNfts.has(getNftMod(nft)))
-        .map((nft) => {
-          return {
-            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-            value: MsgExecuteContract.fromPartial({
-              sender: wallet?.address,
-              msg: toUtf8(
-                JSON.stringify({
-                  approve: {
-                    spender: CONTRACT_ADDRESS,
-                    token_id: String(nft.tokenId),
-                  },
-                }),
-              ),
-              contract: String(nft.collection.contractAddress),
-            }),
+  const handleClaimRewards = useCallback(async () => {
+    if (!userNfts || userNfts.length === 0) return;
+  
+    const claimMsgs = userNfts
+      .filter((nft) => selectedUserNfts.has(getNftMod(nft)))
+      .map((nft) => {
+        const claimMsg = {
+          claim_reward_by_token_id: {
+            collection_addr: nft.collection.contractAddress, // Assuming this is where the collection address is stored
+            token_id: nft.tokenId.toString(),
           }
-        }),*/
-      wasmMsg,
-    ]
+        };
+  
+        return {
+          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+          value: MsgExecuteContract.fromPartial({
+            sender: wallet?.address,
+            msg: toUtf8(JSON.stringify(claimMsg)),
+            contract: "terra1axajrsh9f52kv784x7r2w09dmlp50482gwssaeppvn4qcwv0yp2qahcmms"
+          })
+        };
+      });
 
-
-
-    tx(msgs, { gas: 1499999 }, () => {
-      router.push('/sent')
+    tx(claimMsgs, { gas: 1499999 }, () => {
+      router.push('/stake')
     })
   }, [
     wallet,
@@ -469,7 +430,7 @@ const Trade = () => {
             </div>
           </div>
           <button
-            onClick={handleSendOffer}
+            onClick={handleClaimRewards}
             className="inline-flex items-center justify-center w-full h-10 px-16 py-4 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-500"
           >
             Claim Rewards
