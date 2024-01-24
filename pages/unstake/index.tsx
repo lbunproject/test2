@@ -352,7 +352,7 @@ const Trade = () => {
       });
 
     tx(unstakeMsgs, { gas: 1499999 }, () => {
-      router.push('/stake')
+      router.push('/unstake')
     })
   }, [
     wallet,
@@ -433,7 +433,7 @@ const Trade = () => {
             onClick={handleUnstakeNfts}
             className="inline-flex items-center justify-center w-full h-10 px-16 py-4 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-500"
           >
-            Unstake My NFTs
+            Unstake Selected NFTs
           </button>
         </div>
       </div>

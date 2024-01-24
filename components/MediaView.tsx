@@ -24,14 +24,14 @@ export default function MediaView({
       <div className="mt-2.5">
         <p
           className={classNames(
-            small ? "text-sm font-medium" : "text-lg font-semibold leading-snug"
+            small ? "text-sm font-medium" : "text-base font-semibold leading-snug"
           )}
         >
           {nft.name}
         </p>
         <p
           className={classNames(
-            small ? "text-xs" : "text-base",
+            small ? "text-xs" : "text-sm",
             "text-white/75"
           )}
         >
@@ -52,8 +52,8 @@ export function VerticalMediaView({ nft, href }: { nft: Media; href: string }) {
     >
       <img src={nft.image} className="rounded-md w-14 h-14" />
       <div>
-        <p className="text-base font-semibold text-white">{nft.name}</p>
-        <p className="text-sm text-white/75">{nft.collection.name}</p>
+        <p className="text-sm font-semibold text-white">{nft.name}</p>
+        <p className="text-xs text-white/75">{nft.collection.name}</p>
       </div>
     </a>
   );

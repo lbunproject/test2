@@ -84,7 +84,7 @@ export default async function queryStakedInventory(address: string) {
       if (myStakedNftsJson && myStakedNftsJson.data.info) {
         const nftInfo = myStakedNftsJson.data.info;
         let staking_time = ((Date.now() * 1000000) - (validStakedNft.start_timestamp)) / 1000000000; //in seconds
-const x =Date.now()
+
         // Find the collection attribute for this NFT
         const collectionAttribute = collectionAttributes.find(attr => attr.collectionContract === validStakedNft.token_address);
 
@@ -107,11 +107,11 @@ const x =Date.now()
           creator: nftInfo.extension.creator || "Unknown",
           owner: stakeContractAddr,
           tokenUri: nftInfo.token_uri,
-          name: nftInfo.extension.name || `NFT ${validStakedNft.token_id}`,
+          name:  earnedRewards + ' sFROG' /*nftInfo.extension.name || `NFT ${validStakedNft.token_id}`*/,
           description: nftInfo.extension.description || "No description",
           image: nftInfo.extension.image,
           collection: {
-            name:  'Earned ' + earnedRewards + ' sFROG',
+            name:  'Staking Rewards',
             symbol: "",
             contractAddress: validStakedNft.token_address,
             creator: "",

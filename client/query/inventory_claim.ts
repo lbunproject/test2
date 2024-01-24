@@ -84,34 +84,35 @@ export default async function queryClaimInventory(address: string) {
       if (myClaimNftsJson && myClaimNftsJson.data.info) {
         const nftInfo = myClaimNftsJson.data.info;
         let staking_time = (validClaimNft.end_timestamp - validClaimNft.start_timestamp) / 1000000000; //in seconds
-
+        let unstaked_time = ((Date.now() * 1000000) - (validClaimNft.end_timestamp)) / 1000000000; //in seconds
+        
         // Find the collection attribute for this NFT
         const collectionAttribute = collectionAttributes.find(attr => attr.collectionContract === validClaimNft.token_address);
 
         //Access attributes;   collectionAttribute?.cycle?.toString() ?? "", // Get cycle with Optional Chaining
         const staking_cycles = staking_time / Number(collectionAttribute?.cycle) ?? 1  //staking cycles
 
-        let delay_time = Number(collectionAttribute?.claim_delay) / (24 * 60 * 60) //in days
-        if (delay_time < 1) {
-          delay_time = 0
+        unstaked_time = Number(collectionAttribute?.claim_delay) - unstaked_time
+        if (unstaked_time < 0) {
+          unstaked_time = 0
         } else {
-          delay_time = Math.ceil(delay_time)
+          unstaked_time = unstaked_time / (24 * 60 * 60) //in days
         }
 
         //Info to display
         const earnedRewards = ((Number(collectionAttribute?.reward_amount) / 1000000) * Number(staking_cycles)).toFixed(1)
-        const inDays = '('+ String(delay_time.toFixed(0)) + " days left)"
+        const inDays = unstaked_time != 0 ? 'Release in: '+ String(Math.ceil(unstaked_time)) + " days" : 'Vesting: Complete'
 
         tokenList.push({
           tokenId: validClaimNft.token_id,
           creator: nftInfo.extension.creator || "Unknown",
           owner: stakeContractAddr,
           tokenUri: nftInfo.token_uri,
-          name: nftInfo.extension.name || `NFT ${validClaimNft.token_id}`,
+          name: earnedRewards + ' sFROG ',
           description: nftInfo.extension.description || "No description",
           image: nftInfo.extension.image,
           collection: {
-            name: earnedRewards + ' sFROG ' + inDays,
+            name: inDays,
             symbol: "",
             contractAddress: validClaimNft.token_address,
             creator: "",

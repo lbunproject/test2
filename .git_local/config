@@ -9,3 +9,6 @@
 [branch "main"]
 	remote = origin
 	merge = refs/heads/main
+[branch "sFROG_Tester"]
+	remote = origin
+	merge = refs/heads/sFROG_Tester

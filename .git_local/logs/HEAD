@@ -7,3 +7,7 @@
 105d5dfd572db3e06f539f5fa67cc3b11f5a1042 105d5dfd572db3e06f539f5fa67cc3b11f5a1042 ZuluSpl0it <rhenso2000@gmail.com> 1705870425 -0600	Branch: renamed refs/heads/main to refs/heads/main
 105d5dfd572db3e06f539f5fa67cc3b11f5a1042 a162c4a655921a214102bdf5b9f6bbddd7565c51 ZuluSpl0it <rhenso2000@gmail.com> 1705898766 -0600	commit: stake and unstake work
 a162c4a655921a214102bdf5b9f6bbddd7565c51 2a056a0cc8bb37ac14972fa44b8bc1fd40cbbdcf ZuluSpl0it <rhenso2000@gmail.com> 1705971297 -0600	commit: added labels for rewards
+2a056a0cc8bb37ac14972fa44b8bc1fd40cbbdcf ca82a50455df46a9fd261e212c6cc36b894f6353 ZuluSpl0it <rhenso2000@gmail.com> 1705985509 -0600	commit: all functions work
+ca82a50455df46a9fd261e212c6cc36b894f6353 2a056a0cc8bb37ac14972fa44b8bc1fd40cbbdcf ZuluSpl0it <rhenso2000@gmail.com> 1705985548 -0600	reset: moving to HEAD~
+2a056a0cc8bb37ac14972fa44b8bc1fd40cbbdcf 2a056a0cc8bb37ac14972fa44b8bc1fd40cbbdcf ZuluSpl0it <rhenso2000@gmail.com> 1705985592 -0600	checkout: moving from main to sFROG_Tester
+2a056a0cc8bb37ac14972fa44b8bc1fd40cbbdcf 2b133cabb76898bdfca190d00544548fc0eb1298 ZuluSpl0it <rhenso2000@gmail.com> 1705985627 -0600	commit: tester for all

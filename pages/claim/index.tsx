@@ -352,7 +352,7 @@ const Trade = () => {
       });
 
     tx(claimMsgs, { gas: 1499999 }, () => {
-      router.push('/stake')
+      router.push('/claim')
     })
   }, [
     wallet,
@@ -414,7 +414,7 @@ const Trade = () => {
           <div>
             <p className="text-xl font-medium">Claim Staking Rewards</p>
             <p className="font-medium text-white/75">
-              After unstaked for 7 days
+              After vesting period...
             </p>
             <div className="lg:h-[69vh] mt-4">
               <Inventory
@@ -433,7 +433,7 @@ const Trade = () => {
             onClick={handleClaimRewards}
             className="inline-flex items-center justify-center w-full h-10 px-16 py-4 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-500"
           >
-            Claim Rewards
+            Claim Selected Rewards
           </button>
         </div>
       </div>
