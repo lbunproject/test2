@@ -345,7 +345,7 @@ const Trade = () => {
         
         const stakeMsg = {
           send_nft: {
-            contract: "terra1leqsj8gvgxnasav5ed5lens8j2cq3p0e5qwgulxkqwxqcngetf4qdrhg4l", // Adjust as needed
+            contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j", // Adjust as needed
             token_id: nft.tokenId.toString(),
             msg: encodedInnerMsg
           }
