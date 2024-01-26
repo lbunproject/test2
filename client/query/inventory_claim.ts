@@ -101,7 +101,7 @@ export default async function queryClaimInventory(address: string) {
 
         //Info to display
         const earnedRewards = ((Number(collectionAttribute?.reward_amount) / 1000000) * Number(staking_cycles)).toFixed(1)
-        const inDays = unstaked_time != 0 ? 'Release in: '+ String(Math.ceil(unstaked_time)) + " days" : 'Vesting: Complete'
+        const inDays = unstaked_time != 0 ? 'Release in: '+ String((unstaked_time).toFixed(2)) + " days" : 'Vesting: Complete'
 
         tokenList.push({
           tokenId: validClaimNft.token_id,
