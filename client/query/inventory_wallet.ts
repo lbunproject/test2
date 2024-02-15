@@ -18,7 +18,7 @@ export default async function queryWalletInventory(address: string) {
   let collectionsList: CollectionInfo[] = [];
   let tokenList: Media[] = [];
 
-  const apiEndpoint = "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections.json";
+  const apiEndpoint = "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections_v2.json";
   try {
     const res = await fetch(apiEndpoint);
     const json = await res.json();
@@ -62,11 +62,12 @@ export default async function queryWalletInventory(address: string) {
               creator: nftJson.creator || "Unknown",
               owner: address,
               tokenUri: `${collection.ipfsJSONPrefix}${tokenId}.json`,
-              name: nftJson.name || `NFT ${tokenId}`,
+              //name: nftJson.name || `NFT ${tokenId}`,
+              name: nftJson.name ? (nftJson.name.includes("BASE Miner ") ? nftJson.name.replace("BASE Miner ", "") : nftJson.name) : `NFT ${tokenId}`,
               description: nftJson.description || "No description",
               image: nftJson.image,
               collection: {
-                name: collection.title,
+                name: collection.title ? (collection.title.includes(" NFT Collection") ? collection.title.replace("NFT Collection", "") : collection.title) : "No description",
                 symbol: collection.symbol,
                 contractAddress: collection.mintContract,
                 creator: "",

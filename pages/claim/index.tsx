@@ -346,7 +346,7 @@ const Trade = () => {
           value: MsgExecuteContract.fromPartial({
             sender: wallet?.address,
             msg: toUtf8(JSON.stringify(claimMsg)),
-            contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j"
+            contract: "terra1sztr8gsqfq30c5wxda7k2skjled3pzp848x07e4tduua37y04s6qst7cgw"
           })
         };
       });
@@ -370,7 +370,7 @@ const Trade = () => {
   return (
     <main>
       <div className="flex flex-col space-y-2 lg:items-center lg:space-y-0 lg:flex-row lg:justify-between">
-        <Header>Stake Frogztrik NFTs</Header>
+        <Header>BASE NFTs - Stake & Earn</Header>
       </div>
       <div className="grid grid-cols-1 gap-8 mt-3 mb-4 lg:mb-0 lg:mt-4 2xl:mt-6 lg:grid-cols-2">
         <div>

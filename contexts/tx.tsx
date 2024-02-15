@@ -99,7 +99,7 @@ export function TxProvider({ children }: { children: ReactNode }) {
                 <>
                   View{" "}
                   <a
-                    href={`${process.env.NEXT_PUBLIC_BLOCK_EXPLORER!}/txs/${
+                    href={`${process.env.NEXT_PUBLIC_BLOCK_EXPLORER!}/tx/${
                       res.transactionHash
                     }`}
                     rel="noopener noreferrer"
