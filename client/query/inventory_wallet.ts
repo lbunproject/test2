@@ -18,13 +18,13 @@ export default async function queryWalletInventory(address: string) {
   let tokenList: Media[] = [];
 
   const apiEndpoint =
-    "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections_v2.json";
+    "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections_v3.json";
   try {
     const res = await fetch(apiEndpoint);
     const json = await res.json();
 
     if (!json || !Array.isArray(json)) {
-      throw new Error("Invalid API response");
+      throw new Error('Invalid API response');
     }
 
     // Fetch both CSV files
