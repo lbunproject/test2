@@ -163,7 +163,7 @@ const Trade = () => {
 
           // If the shorturl exists, let's push it back as a bech32
           router.push({
-            pathname: '/stake',
+            pathname: '/unstake',
             query,
           })
         })

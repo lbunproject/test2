@@ -355,7 +355,7 @@ const Trade = () => {
   const totalGas = Math.ceil(claimMsgs.length) * 2499999;
 
   tx(claimMsgs, { gas: totalGas }, () => {
-      router.push('/claim')
+      router.push('/stake')
     })
   }, [
     wallet,
