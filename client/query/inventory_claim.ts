@@ -21,13 +21,14 @@ type CollectionAttribute = {
 };
 
 export default async function queryClaimInventory(address: string) {
-
   let collectionsList: CollectionInfo[] = [];
   let collectionAttributes: CollectionAttribute[] = [];
   let tokenList: Media[] = [];
-  let stakeContractAddr = "terra1sztr8gsqfq30c5wxda7k2skjled3pzp848x07e4tduua37y04s6qst7cgw";
+  let stakeContractAddr = 
+    "terra1sztr8gsqfq30c5wxda7k2skjled3pzp848x07e4tduua37y04s6qst7cgw";
 
-  const apiEndpoint = "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections_v2.json";
+  const apiEndpoint = 
+    "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections_v2.json";
   try {
     const res = await fetch(apiEndpoint);
     const json = await res.json();
@@ -35,6 +36,52 @@ export default async function queryClaimInventory(address: string) {
     if (!json || !Array.isArray(json)) {
       throw new Error('Invalid API response');
     }
+
+    // Fetch both CSV files
+    const bigbangxCsvRes = await fetch(
+      "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/nft_img/image_ref_bigbangx.csv"
+    );
+    const miataCsvRes = await fetch(
+      "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/nft_img/image_ref_miata.csv"
+    );
+
+    // Parse CSV data
+    const bigbangxCsvText = await bigbangxCsvRes.text();
+    const miataCsvText = await miataCsvRes.text();
+
+    const parseCsvData = (csvText: string) => {
+      const csvData = csvText
+        .split("\n")
+        .slice(1) // Skip the header row
+        .map((row) => {
+          const [tokenId, url] = row.split(",");
+          return { tokenId, url };
+        });
+
+      return new Map(csvData.map((entry) => [entry.tokenId, entry.url]));
+    };
+
+    // Map CSV data
+    const bigbangxMap = parseCsvData(bigbangxCsvText);
+    const miataMap = parseCsvData(miataCsvText);
+
+    // Map mintContract values to market names
+    const marketMap = new Map([
+      [
+        "terra13es92exczudq2z6v40vcnkc6vt9jffgjukrknxek8f0y69jrmv6sqly4ly",
+        "bigbangx",
+      ],
+      [
+        "terra1jcjavh7vmj4anht2mmy5jewjyjxdkwxagdwgwyj3de4txftr2m4qjmudr0",
+        "miata",
+      ],
+    ]);
+
+    // Create a map from mintContract to image reference map
+    const marketImageRefMap = new Map([
+      ["bigbangx", bigbangxMap],
+      ["miata", miataMap],
+    ]);
 
     collectionsList = json.map((collection: any) => ({
       symbol: collection.symbol,
@@ -49,7 +96,8 @@ export default async function queryClaimInventory(address: string) {
     }));
 
     // Fetch additional collection info from the CosmWasm contract
-    const additionalInfoRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/eyJnZXRfY29sbGVjdGlvbnMiOnt9fQ==`);
+    const additionalInfoRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/eyJnZXRfY29sbGVjdGlvbnMiOnt9fQ==`
+    );
     const additionalInfoJson = await additionalInfoRes.json();
     const additionalInfo = additionalInfoJson.data;
 
@@ -78,7 +126,8 @@ export default async function queryClaimInventory(address: string) {
 
       let query = Buffer.from(JSON.stringify({ all_nft_info: { token_id: validClaimNft.token_id } })).toString('base64');
 
-      const myClaimNftsRes = await fetch(`https://terra-classic-lcd.publicnode.com/cosmwasm/wasm/v1/contract/${validClaimNft.token_address}/smart/${query}`);
+      const myClaimNftsRes = await fetch(`https://terra-classic-lcd.publicnode.com/cosmwasm/wasm/v1/contract/${validClaimNft.token_address}/smart/${query}`
+      );
       const myClaimNftsJson = await myClaimNftsRes.json();
 
       if (myClaimNftsJson && myClaimNftsJson.data.info) {
@@ -99,6 +148,27 @@ export default async function queryClaimInventory(address: string) {
           unstaked_time = unstaked_time / (24 * 60 * 60) //in days
         }
 
+
+        // Determine the market for fetching image URLs
+        const market = marketMap.get(validClaimNft.token_address);
+        if (!market) {
+          throw new Error(
+            `Unknown market for mintContract: ${validClaimNft.token_address}`
+          );
+        }
+
+        // Get the appropriate image reference map based on the market
+        const imageRefMap = marketImageRefMap.get(market);
+        if (!imageRefMap) {
+          throw new Error(
+            `Image reference map not found for market: ${market}`
+          );
+        }
+
+        // Get the image URL from the reference map, or use default if not found
+        const imageUrl =
+          imageRefMap.get(validClaimNft.token_id) || nftInfo.image;
+
         //Info to display
         const earnedRewards = ((Number(collectionAttribute?.reward_amount) / 1000000) * Number(staking_cycles)).toFixed(1)
         const inDays = unstaked_time != 0 ? 'Release in: '+ String((unstaked_time).toFixed(2)) + " days" : 'Vesting: Complete'
@@ -110,7 +180,7 @@ export default async function queryClaimInventory(address: string) {
           tokenUri: nftInfo.token_uri,
           name: earnedRewards + ' cwLUNC ',
           description: nftInfo.extension.description || "No description",
-          image: nftInfo.extension.image,
+          image: imageUrl,
           collection: {
             name: inDays,
             symbol: "",

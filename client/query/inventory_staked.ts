@@ -115,8 +115,6 @@ export default async function queryStakedInventory(address: string) {
       };
     });
 
-    address = "terra199jlusyxpj7p5s9emw62fedjp7j3frw0nk3h5q"; //rbh
-
     // Fetch staked NFTs
     let query = Buffer.from(
       JSON.stringify({ get_stakings_by_owner: { owner: address } })

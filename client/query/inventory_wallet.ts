@@ -121,7 +121,6 @@ export default async function queryWalletInventory(address: string) {
       }
       let last_item = 0; // Initialize page counter
 
-      address = "terra1q5t3lshfnam6ra70cw44wq9mkrdx3wxksjxmq6"; //rbh
       while (true) {
         let query = Buffer.from(
           JSON.stringify({
