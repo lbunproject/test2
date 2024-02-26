@@ -28,7 +28,7 @@ export default async function queryClaimInventory(address: string) {
     "terra1sztr8gsqfq30c5wxda7k2skjled3pzp848x07e4tduua37y04s6qst7cgw";
 
   const apiEndpoint = 
-    "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections_v2.json";
+    "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections_v3.json";
   try {
     const res = await fetch(apiEndpoint);
     const json = await res.json();
