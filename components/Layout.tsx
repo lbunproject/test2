@@ -11,6 +11,7 @@ import {
   LockClosedIcon,
   LockOpenIcon,
   GiftIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { useWallet } from "client";
 
@@ -36,6 +37,12 @@ export default function Layout({ children }: { children: ReactNode }) {
           href: "/claim",
           icon: GiftIcon,
           current: router.asPath.split("/").includes("claim"),
+        },
+        {
+          name: "Club",
+          href: "/club",
+          icon: UserGroupIcon,
+          current: router.asPath.split("/").includes("club"),
         },
       ]
     : [];
