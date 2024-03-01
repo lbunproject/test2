@@ -238,6 +238,7 @@ const Trade = () => {
       </div>
     </main>
   )
+
 }
 
 export default Trade
