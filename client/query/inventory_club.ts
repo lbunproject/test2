@@ -124,26 +124,10 @@ export default async function queryClubInventory(address: string) {
     );
     const stakedNftsJson = await stakedNftsRes.json();
 
-    // Filter valid staked NFTs
-    const validStakedNfts = stakedNftsJson.data.filter(
-      (nft: { start_timestamp: any; end_timestamp: string }) =>
-        nft.start_timestamp && nft.end_timestamp === "0"
-    );
-
     // Fetch data from blockchain
-    for (let validStakedNft of validStakedNfts) {
-      console.log(collectionsList);
-      let query = Buffer.from(
-        JSON.stringify({ all_nft_info: { token_id: validStakedNft.token_id } })
-      ).toString("base64");
+    for (let validStakedNft of stakedNftsJson.data) {
 
-      const myStakedNftsRes = await fetch(
-        `https://terra-classic-lcd.publicnode.com/cosmwasm/wasm/v1/contract/${validStakedNft.token_address}/smart/${query}`
-      );
-      const myStakedNftsJson = await myStakedNftsRes.json();
-
-      if (myStakedNftsJson && myStakedNftsJson.data.info) {
-        const nftInfo = myStakedNftsJson.data.info;
+        const nftInfo = validStakedNft;
 
         let staking_time =
           (Date.now() * 1000000 - validStakedNft.start_timestamp) / 1000000000; //in seconds
@@ -202,11 +186,11 @@ export default async function queryClubInventory(address: string) {
 
         tokenList.push({
           tokenId: validStakedNft.token_id,
-          creator: nftInfo.extension.creator || "Unknown",
+          creator: "Unknown",
           owner: stakeContractAddr,
           tokenUri: nftInfo.token_uri,
           name: earnedRewards + " cwLUNC",
-          description: nftInfo.extension.description || "No description",
+          description: "No description",
           image: imageUrl,
           collection: {
             name: shortenedAddress,
@@ -221,7 +205,6 @@ export default async function queryClubInventory(address: string) {
           expiresAt: null,
           expiresAtDateTime: null,
         });
-      }
     }
   } catch (error) {
     console.error(error);
