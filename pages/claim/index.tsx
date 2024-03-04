@@ -352,10 +352,10 @@ const Trade = () => {
       });
 
   // Calculate the total gas based on the number of selected NFTs
-  const totalGas = Math.ceil(claimMsgs.length) * 2499999;
+  const totalGas = Math.ceil(claimMsgs.length) * 5499999;
 
   tx(claimMsgs, { gas: totalGas }, () => {
-      router.push('/claim')
+      router.push('/stake')
     })
   }, [
     wallet,
