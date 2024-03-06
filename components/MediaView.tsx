@@ -36,6 +36,8 @@ export default function MediaView({
           )}
         >
           {nft.collection.name}
+          ID:{nft.tokenId}
+
         </p>
       </div>
     </a>
@@ -54,6 +56,7 @@ export function VerticalMediaView({ nft, href }: { nft: Media; href: string }) {
       <div>
         <p className="text-sm font-semibold text-white">{nft.name}</p>
         <p className="text-xs text-white/75">{nft.collection.name}</p>
+        <p className="text-xs text-white/75">ID:{nft.tokenId}</p>
       </div>
     </a>
   );
