@@ -36,8 +36,8 @@ export default function MediaView({
           )}
         >
           {nft.collection.name}
-          ID:{nft.tokenId}
-
+          <br />
+          ID: {nft.tokenId}
         </p>
       </div>
     </a>
