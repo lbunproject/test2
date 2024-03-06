@@ -346,7 +346,7 @@ const Trade = () => {
           value: MsgExecuteContract.fromPartial({
             sender: wallet?.address,
             msg: toUtf8(JSON.stringify(claimMsg)),
-            contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j"
+            contract: "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e"
           })
         };
       });

@@ -47,13 +47,13 @@ const tabs: {
   id: Tab
   name: string
 }[] = [
-  {
-    id: 'user',
-    name: 'Your NFT Inventory',
-  },
-]
+    {
+      id: 'user',
+      name: 'Your NFT Inventory',
+    },
+  ]
 
-function none() {}
+function none() { }
 const Inventory = ({
   nfts,
   handleClick,
@@ -156,9 +156,9 @@ const Trade = () => {
           // save the offer if it exists, if not don't include it
           let query = queryOfferedNfts
             ? {
-                peer,
-                offer: queryOfferedNfts,
-              }
+              peer,
+              offer: queryOfferedNfts,
+            }
             : { peer }
 
           // If the shorturl exists, let's push it back as a bech32
@@ -330,7 +330,7 @@ const Trade = () => {
 
   const handleStakeNfts = useCallback(async () => {
     if (!userNfts || userNfts.length === 0) return;
-  
+
     const stakeMsgs = userNfts
       .filter((nft) => selectedUserNfts.has(getNftMod(nft)))
       .map((nft) => {
@@ -339,18 +339,18 @@ const Trade = () => {
           token_id: nft.tokenId.toString(),
           msg: ""
         };
-  
+
         const encoder = new TextEncoder();
         const encodedInnerMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify(innerMsg))));
-        
+
         const stakeMsg = {
           send_nft: {
-            contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j", // Adjust as needed
+            contract: "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e", //Staking contract
             token_id: nft.tokenId.toString(),
             msg: encodedInnerMsg
           }
         };
-  
+
         return {
           typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
           value: MsgExecuteContract.fromPartial({
@@ -360,14 +360,45 @@ const Trade = () => {
           })
         };
       });
-  
-  // Calculate the total gas based on the number of selected NFTs
-  const totalGas = Math.ceil(stakeMsgs.length) * 5499999;
 
-  tx(stakeMsgs, { gas: totalGas }, () => {
-    router.push('/unstake');
+    const encoder = new TextEncoder();
+    //let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify("{pay_fee:{}}"))));
+    
+    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({"pay_fee":{"collection_addr":"terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e"}}))));
+
+
+    const cw20FeeMsg = {
+      send: {
+        contract: "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e", //NFT Staking contract
+        amount: "5000000",
+        msg: encodedMsg
+      }
+    };
+
+
+    // Include your CW20 token transaction as part of the stakeMsgs array
+    const combinedMsg = {
+      typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+      value: MsgExecuteContract.fromPartial({
+        sender: wallet?.address,
+        msg: toUtf8(JSON.stringify(cw20FeeMsg)),
+        contract: "terra1uewxz67jhhhs2tj97pfm2egtk7zqxuhenm4y4m", //Reward Token
+      })
+    };
+
+    //terra10fusc7487y4ju2v5uavkauf3jdpxx9h8sc7wsqdqg4rne8t4qyrq8385q6
+    //terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e
+
+    // Add the CW20 fee message to the array of messages to be sent
+    stakeMsgs.push(combinedMsg);
+
+    // Calculate the total gas based on the number of selected NFTs
+    const totalGas = Math.ceil(stakeMsgs.length) * 2499999;
+
+    tx(stakeMsgs, { gas: totalGas }, () => {
+      router.push('/unstake');
     });
-  
+
   }, [
     wallet,
     userNfts,
@@ -385,10 +416,10 @@ const Trade = () => {
       <div className="grid grid-cols-1 gap-8 mt-3 mb-4 lg:mb-0 lg:mt-4 2xl:mt-6 lg:grid-cols-2">
         <div>
 
-            <p className="text-xl font-medium">Your NFT Inventory</p>
-            <p className="font-medium text-white/75">
-              Located in wallet...
-            </p>
+          <p className="text-xl font-medium">Your NFT Inventory</p>
+          <p className="font-medium text-white/75">
+            Located in wallet...
+          </p>
 
           <div className="lg:h-[75vh] mt-4">
             <Inventory
