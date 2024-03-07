@@ -13,6 +13,8 @@ import { ShortUrl } from '@prisma/client'
 import useToaster, { ToastTypes } from 'hooks/useToaster'
 import { classNames } from 'util/css'
 import { fetchNfts } from 'util/nft'
+import FeeDenomDropdown from 'components/FeeDenomDropdown'; // Make sure the path is correct based on your file structure
+
 
 enum SelectTarget {
   User,
@@ -120,6 +122,12 @@ const Trade = () => {
   const router = useRouter()
 
   const { peer: queryPeer, offer: queryOfferedNfts } = router.query
+
+  let [feeSelected, setFeeSelected] = useState('FROG'); // Define feeSelected state here
+
+  const handleSetFeeDenomination = (value: string) => {
+    setFeeSelected(value); // Update the selected fee
+  };
 
   // Querystring manipulation
   useEffect(() => {
@@ -361,16 +369,28 @@ const Trade = () => {
         };
       });
 
+
     const encoder = new TextEncoder();
     //let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify("{pay_fee:{}}"))));
-    
-    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({"pay_fee":{"collection_addr":"terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e"}}))));
+
+    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "collection_addr": "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e" } }))));
+
+    let feeAmount = 0;
+    let feeCw20Address = "";
+
+    if (feeSelected === "BASE") {
+      feeCw20Address = "terra1uewxz67jhhhs2tj97pfm2egtk7zqxuhenm4y4m";
+      feeAmount = Math.ceil(5 * 1000000 * stakeMsgs.length);
+    } else if (feeSelected === "FROG") {
+      feeCw20Address = "terra1wez9puj43v4s25vrex7cv3ut3w75w4h6j5e537sujyuxj0r5ne2qp9uwl9";
+      feeAmount = Math.ceil( 10 * 1000000 * stakeMsgs.length);
+    }
 
 
     const cw20FeeMsg = {
       send: {
         contract: "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e", //NFT Staking contract
-        amount: "5000000",
+        amount: feeAmount.toString(),
         msg: encodedMsg
       }
     };
@@ -382,18 +402,15 @@ const Trade = () => {
       value: MsgExecuteContract.fromPartial({
         sender: wallet?.address,
         msg: toUtf8(JSON.stringify(cw20FeeMsg)),
-        contract: "terra1uewxz67jhhhs2tj97pfm2egtk7zqxuhenm4y4m", //Reward Token
+        contract: feeCw20Address, //Fee Token
       })
     };
-
-    //terra10fusc7487y4ju2v5uavkauf3jdpxx9h8sc7wsqdqg4rne8t4qyrq8385q6
-    //terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e
 
     // Add the CW20 fee message to the array of messages to be sent
     stakeMsgs.push(combinedMsg);
 
     // Calculate the total gas based on the number of selected NFTs
-    const totalGas = Math.ceil(stakeMsgs.length) * 2499999;
+    const totalGas = Math.ceil((stakeMsgs.length - 1)) * 3499999; //one transaction is cw20
 
     tx(stakeMsgs, { gas: totalGas }, () => {
       router.push('/unstake');
@@ -460,7 +477,7 @@ const Trade = () => {
             <p className="font-medium text-white/75">
               These NFTs will be staked...
             </p>
-            <div className="lg:h-[69vh] mt-4">
+            <div className="lg:h-[66vh] mt-4">
               <Inventory
                 isLoading={false}
                 nfts={
@@ -473,12 +490,17 @@ const Trade = () => {
               />
             </div>
           </div>
-          <button
-            onClick={handleStakeNfts}
-            className="inline-flex items-center justify-center w-full h-10 px-16 py-4 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-500"
-          >
-            Stake Selected NFTs
-          </button>
+          <div className="lg:h-[4vh] flex flex-col items-center space-y-2 sm:flex-row sm:items-center sm:justify-center sm:space-x-8"
+            style={{ marginTop: '10px', marginRight: '0px', marginBottom: '0px', marginLeft: '4px' }}>
+            <FeeDenomDropdown onChange={handleSetFeeDenomination} />
+            <button
+              onClick={handleStakeNfts}
+              className="flex items-center justify-center w-64 sm:px-24 py-4 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-500"
+              style={{ marginTop: '10px', marginLeft: '32px' }}
+            >
+              Stake
+            </button>
+          </div>
         </div>
       </div>
     </main>
