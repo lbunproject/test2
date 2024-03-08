@@ -13,6 +13,7 @@ import { ShortUrl } from '@prisma/client'
 import useToaster, { ToastTypes } from 'hooks/useToaster'
 import { classNames } from 'util/css'
 import { fetchNfts } from 'util/nft'
+import FeeDenomDropdown from 'components/FeeDenomDropdown';
 
 enum SelectTarget {
   User,
@@ -47,13 +48,13 @@ const tabs: {
   id: Tab
   name: string
 }[] = [
-  {
-    id: 'user',
-    name: 'Your NFT Inventory',
-  },
-]
+    {
+      id: 'user',
+      name: 'Your NFT Inventory',
+    },
+  ]
 
-function none() {}
+function none() { }
 const Inventory = ({
   nfts,
   handleClick,
@@ -111,7 +112,7 @@ const Inventory = ({
   </div>
 )
 
-const Trade = () => {
+const Unstake = () => {
   const { wallet } = useWallet()
   const { tx } = useTx()
   const { client } = useStargazeClient()
@@ -120,6 +121,29 @@ const Trade = () => {
   const router = useRouter()
 
   const { peer: queryPeer, offer: queryOfferedNfts } = router.query
+
+  let [unstakeFeeSelected, setUnstakeFeeSelected] = useState(''); // Define feeSelected state here
+
+  // Function to handle stakeFeeSelected change
+  const handleSetUnStakeFeeDenomination = (value: string) => {
+    // Update state and store in local storage
+    setUnstakeFeeSelected(value);
+    localStorage.setItem('unstakeFeeSelected', value);
+  };
+
+  // Add useEffect to initialize stakeFeeSelected only once
+  useEffect(() => {
+    // Load stakeFeeSelected from local storage or any other persistent storage
+    const storedUnStakeFeeSelected = localStorage.getItem('unstakeFeeSelected');
+    if (storedUnStakeFeeSelected) {
+      setUnstakeFeeSelected(storedUnStakeFeeSelected);
+    }
+  }, []);
+
+  // Call onChange when the component mounts
+  /*useEffect(() => {
+    setFeeSelected(feeSelected); // Assuming feeSelected is the initial value of the dropdown
+  }, []); // Empty dependency array ensures it runs only once when the component mounts*/
 
   // Querystring manipulation
   useEffect(() => {
@@ -156,9 +180,9 @@ const Trade = () => {
           // save the offer if it exists, if not don't include it
           let query = queryOfferedNfts
             ? {
-                peer,
-                offer: queryOfferedNfts,
-              }
+              peer,
+              offer: queryOfferedNfts,
+            }
             : { peer }
 
           // If the shorturl exists, let's push it back as a bech32
@@ -330,7 +354,7 @@ const Trade = () => {
 
   const handleUnstakeNfts = useCallback(async () => {
     if (!userNfts || userNfts.length === 0) return;
-  
+
     const unstakeMsgs = userNfts
       .filter((nft) => selectedUserNfts.has(getNftMod(nft)))
       .map((nft) => {
@@ -340,7 +364,7 @@ const Trade = () => {
             token_id: nft.tokenId.toString(),
           }
         };
-  
+
         return {
           typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
           value: MsgExecuteContract.fromPartial({
@@ -351,10 +375,51 @@ const Trade = () => {
         };
       });
 
-  // Calculate the total gas based on the number of selected NFTs
-  const totalGas = Math.ceil(unstakeMsgs.length) * 5499999;
+    // Abort if there are not NFTs to Unstake  
+    if (!unstakeMsgs || unstakeMsgs.length === 0) return;
 
-  tx(unstakeMsgs, { gas: totalGas }, () => {
+    // Fee portion of the transaction
+    const encoder = new TextEncoder();
+    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "collection_addr": "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e" } }))));
+
+    let feeAmount = 0;
+    let feeCw20Address = "";
+
+    const unstakeFeeSelected = localStorage.getItem('unstakeFeeSelected');
+
+    if (unstakeFeeSelected === "BASE") {
+      feeCw20Address = "terra1uewxz67jhhhs2tj97pfm2egtk7zqxuhenm4y4m";
+      feeAmount = Math.ceil(5 * 1000000 * unstakeMsgs.length);
+    } else if (unstakeFeeSelected === "FROG") {
+      feeCw20Address = "terra1wez9puj43v4s25vrex7cv3ut3w75w4h6j5e537sujyuxj0r5ne2qp9uwl9";
+      feeAmount = Math.ceil(10 * 1000000 * unstakeMsgs.length);
+    }
+
+    const cw20FeeMsg = {
+      send: {
+        contract: "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e", //NFT Staking contract
+        amount: feeAmount.toString(),
+        msg: encodedMsg,
+      }
+    };
+
+    // Include your CW20 token transaction as part of the stakeMsgs array
+    const combinedMsg = {
+      typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+      value: MsgExecuteContract.fromPartial({
+        sender: wallet?.address,
+        msg: toUtf8(JSON.stringify(cw20FeeMsg)),
+        contract: feeCw20Address, //Fee Token
+      })
+    };
+
+    // Add the CW20 fee message to the array of messages to be sent
+    unstakeMsgs.push(combinedMsg);
+
+    // Calculate the total gas based on the number of selected NFTs
+    const totalGas = Math.ceil((unstakeMsgs.length - 1)) * 3499999; //one transaction is cw20
+
+    tx(unstakeMsgs, { gas: totalGas }, () => {
       router.push('/stake')
     })
   }, [
@@ -375,10 +440,10 @@ const Trade = () => {
       <div className="grid grid-cols-1 gap-8 mt-3 mb-4 lg:mb-0 lg:mt-4 2xl:mt-6 lg:grid-cols-2">
         <div>
 
-            <p className="text-xl font-medium">Your Staked NFTs</p>
-            <p className="font-medium text-white/75">
-              Located in Smart Contract...
-            </p>
+          <p className="text-xl font-medium">Your Staked NFTs</p>
+          <p className="font-medium text-white/75">
+            Located in Smart Contract...
+          </p>
 
           <div className="lg:h-[75vh] mt-4">
             <Inventory
@@ -419,7 +484,7 @@ const Trade = () => {
             <p className="font-medium text-white/75">
               These NFTs will be unstaked...
             </p>
-            <div className="lg:h-[69vh] mt-4">
+            <div className="lg:h-[66vh] mt-4">
               <Inventory
                 isLoading={false}
                 nfts={
@@ -432,16 +497,38 @@ const Trade = () => {
               />
             </div>
           </div>
-          <button
-            onClick={handleUnstakeNfts}
-            className="inline-flex items-center justify-center w-full h-10 px-16 py-4 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-500"
-          >
-            Unstake Selected NFTs
-          </button>
+          <div className="lg:h-[4vh] flex flex-col items-center space-y-2 sm:flex-row sm:items-center sm:justify-center sm:space-x-8"
+            style={{ marginTop: '10px', marginRight: '0px', marginBottom: '0px', marginLeft: '4px' }}>
+          {/*<FeeDenomDropdown onChange={handleSetStakeFeeDenomination} />*/}
+          <div className="flex items-center justify-center space-x-5 mt-2">
+            <label htmlFor="fee-denomination" className="block text-sm font-medium text-white/75">
+              Fee
+            </label>
+            <select
+              id="fee-denomination"
+              value={unstakeFeeSelected}
+              onChange={(e) => handleSetUnStakeFeeDenomination(e.target.value)}
+              className="w-32 border bg-firefly rounded-lg border-white/10 focus:ring focus:ring-primary ring-offset-firefly px-4 py-2.5 text-white"
+            >
+              <option value=""></option>
+              <option value="FROG">10 FROG</option>
+              <option value="BASE">5 BASE</option>
+            </select>
+          </div>
+            <button
+              onClick={handleUnstakeNfts}
+              disabled={unstakeFeeSelected === ""}
+              className={`flex items-center justify-center w-64 sm:px-24 py-4 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-500 
+                ${unstakeFeeSelected === "" ? 'opacity-50 cursor-not-allowed' : ''}`}
+              style={{ marginTop: '10px', marginLeft: '32px' }}
+            >
+              Unstake
+            </button>
+          </div>
         </div>
       </div>
     </main>
   )
 }
 
-export default Trade
+export default Unstake

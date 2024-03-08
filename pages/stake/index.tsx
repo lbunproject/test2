@@ -13,13 +13,14 @@ import { ShortUrl } from '@prisma/client'
 import useToaster, { ToastTypes } from 'hooks/useToaster'
 import { classNames } from 'util/css'
 import { fetchNfts } from 'util/nft'
-import FeeDenomDropdown from 'components/FeeDenomDropdown'; // Make sure the path is correct based on your file structure
+import FeeDenomDropdown from 'components/FeeDenomDropdown';
 
 
 enum SelectTarget {
   User,
   Peer,
 }
+
 
 type Tab = 'user' | 'peer'
 
@@ -113,7 +114,7 @@ const Inventory = ({
   </div>
 )
 
-const Trade = () => {
+const Stake = () => {
   const { wallet } = useWallet()
   const { tx } = useTx()
   const { client } = useStargazeClient()
@@ -123,11 +124,23 @@ const Trade = () => {
 
   const { peer: queryPeer, offer: queryOfferedNfts } = router.query
 
-  let [feeSelected, setFeeSelected] = useState('FROG'); // Define feeSelected state here
+  let [stakeFeeSelected, setStakeFeeSelected] = useState('');
 
-  const handleSetFeeDenomination = (value: string) => {
-    setFeeSelected(value); // Update the selected fee
+  // Function to handle stakeFeeSelected change
+  const handleSetStakeFeeDenomination = (value: string) => {
+    // Update state and store in local storage
+    setStakeFeeSelected(value);
+    localStorage.setItem('stakeFeeSelected', value);
   };
+
+  // Add useEffect to initialize stakeFeeSelected only once
+  useEffect(() => {
+    // Load stakeFeeSelected from local storage or any other persistent storage
+    const storedStakeFeeSelected = localStorage.getItem('stakeFeeSelected');
+    if (storedStakeFeeSelected) {
+      setStakeFeeSelected(storedStakeFeeSelected);
+    }
+  }, []);
 
   // Querystring manipulation
   useEffect(() => {
@@ -369,32 +382,33 @@ const Trade = () => {
         };
       });
 
+    // Abort if there are not NFTs to Stake  
+    if (!stakeMsgs || stakeMsgs.length === 0) return;
 
+    // Fee portion of the transaction
     const encoder = new TextEncoder();
-    //let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify("{pay_fee:{}}"))));
-
     let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "collection_addr": "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e" } }))));
 
     let feeAmount = 0;
     let feeCw20Address = "";
 
-    if (feeSelected === "BASE") {
+    const stakeFeeSelected = localStorage.getItem('stakeFeeSelected');
+
+    if (stakeFeeSelected === "BASE") {
       feeCw20Address = "terra1uewxz67jhhhs2tj97pfm2egtk7zqxuhenm4y4m";
       feeAmount = Math.ceil(5 * 1000000 * stakeMsgs.length);
-    } else if (feeSelected === "FROG") {
+    } else if (stakeFeeSelected === "FROG") {
       feeCw20Address = "terra1wez9puj43v4s25vrex7cv3ut3w75w4h6j5e537sujyuxj0r5ne2qp9uwl9";
-      feeAmount = Math.ceil( 10 * 1000000 * stakeMsgs.length);
+      feeAmount = Math.ceil(10 * 1000000 * stakeMsgs.length);
     }
-
 
     const cw20FeeMsg = {
       send: {
         contract: "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e", //NFT Staking contract
         amount: feeAmount.toString(),
-        msg: encodedMsg
+        msg: encodedMsg,
       }
     };
-
 
     // Include your CW20 token transaction as part of the stakeMsgs array
     const combinedMsg = {
@@ -492,10 +506,29 @@ const Trade = () => {
           </div>
           <div className="lg:h-[4vh] flex flex-col items-center space-y-2 sm:flex-row sm:items-center sm:justify-center sm:space-x-8"
             style={{ marginTop: '10px', marginRight: '0px', marginBottom: '0px', marginLeft: '4px' }}>
-            <FeeDenomDropdown onChange={handleSetFeeDenomination} />
+            {/*<FeeDenomDropdown onChange={handleSetStakeFeeDenomination} />*/}
+
+            <div className="flex items-center justify-center space-x-5 mt-2">
+              <label htmlFor="fee-denomination" className="block text-sm font-medium text-white/75">
+                Fee
+              </label>
+              <select
+                id="fee-denomination"
+                value={stakeFeeSelected}
+                onChange={(e) => handleSetStakeFeeDenomination(e.target.value)}
+                className="w-32 border bg-firefly rounded-lg border-white/10 focus:ring focus:ring-primary ring-offset-firefly px-4 py-2.5 text-white"
+              >
+                <option value=''></option>
+                <option value="FROG">10 FROG</option>
+                <option value="BASE">5 BASE</option>
+              </select>
+            </div>
+
             <button
               onClick={handleStakeNfts}
-              className="flex items-center justify-center w-64 sm:px-24 py-4 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-500"
+              disabled={stakeFeeSelected === ""}
+              className={`flex items-center justify-center w-64 sm:px-24 py-4 text-sm font-medium text-white rounded-lg bg-primary hover:bg-primary-500 
+                ${stakeFeeSelected === "" ? 'opacity-50 cursor-not-allowed' : ''}`}
               style={{ marginTop: '10px', marginLeft: '32px' }}
             >
               Stake
@@ -505,6 +538,7 @@ const Trade = () => {
       </div>
     </main>
   )
+
 }
 
-export default Trade
+export default Stake

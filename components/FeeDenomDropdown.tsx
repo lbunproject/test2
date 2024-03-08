@@ -5,8 +5,8 @@ interface FeeDenominationDropdownProps {
   onChange: (value: string) => void;
 }
 
-const FeeDenominationDropdown: React.FC<FeeDenominationDropdownProps> = ({ onChange }) => {
-  const [feeSelected, setFeeSelected] = useState('FROG'); 
+const FeeDenominationDropdown: React.FC<FeeDenominationDropdownProps> = ({ onChange}) => {
+  const [feeSelected, setFeeSelected] = useState(''); 
 
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -26,6 +26,7 @@ const FeeDenominationDropdown: React.FC<FeeDenominationDropdownProps> = ({ onCha
         onChange={handleChange}
         className="w-32 border bg-firefly rounded-lg border-white/10 focus:ring focus:ring-primary ring-offset-firefly px-4 py-2.5 text-white"
       >
+        <option value=""></option>
         <option value="FROG">10 FROG</option>
         <option value="BASE">5 BASE</option>
       </select>

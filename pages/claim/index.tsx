@@ -111,7 +111,7 @@ const Inventory = ({
   </div>
 )
 
-const Trade = () => {
+const Claim = () => {
   const { wallet } = useWallet()
   const { tx } = useTx()
   const { client } = useStargazeClient()
@@ -444,4 +444,4 @@ const Trade = () => {
   )
 }
 
-export default Trade
+export default Claim

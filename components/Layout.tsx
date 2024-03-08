@@ -14,6 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useWallet } from "client";
 
+
 export default function Layout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { wallet } = useWallet();
