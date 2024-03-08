@@ -25,7 +25,7 @@ export default async function queryStakedInventory(address: string) {
   let collectionsList: CollectionInfo[] = [];
   let collectionAttributes: CollectionAttribute[] = [];
   let tokenList: Media[] = [];
-  let stakeContractAddr = "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e";
+  let stakeContractAddr = "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j";
 
   const apiEndpoint = "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections.json";
   try {

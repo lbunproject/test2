@@ -13,7 +13,6 @@ import { ShortUrl } from '@prisma/client'
 import useToaster, { ToastTypes } from 'hooks/useToaster'
 import { classNames } from 'util/css'
 import { fetchNfts } from 'util/nft'
-import FeeDenomDropdown from 'components/FeeDenomDropdown';
 
 enum SelectTarget {
   User,
@@ -370,7 +369,7 @@ const Unstake = () => {
           value: MsgExecuteContract.fromPartial({
             sender: wallet?.address,
             msg: toUtf8(JSON.stringify(unstakeMsg)),
-            contract: "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e"
+            contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j"
           })
         };
       });
@@ -380,7 +379,7 @@ const Unstake = () => {
 
     // Fee portion of the transaction
     const encoder = new TextEncoder();
-    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "collection_addr": "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e" } }))));
+    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "collection_addr": "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j" } }))));
 
     let feeAmount = 0;
     let feeCw20Address = "";
@@ -397,7 +396,7 @@ const Unstake = () => {
 
     const cw20FeeMsg = {
       send: {
-        contract: "terra16xae2dv67t938nqvfzsnfwzhytrek7pypswtq3zyqzgspvyka8kqwqgr0e", //NFT Staking contract
+        contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j", //NFT Staking contract
         amount: feeAmount.toString(),
         msg: encodedMsg,
       }
