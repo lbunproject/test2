@@ -336,7 +336,7 @@ const Claim = () => {
       .map((nft) => {
         const claimMsg = {
           claim_reward_by_token_id: {
-            collection_addr: nft.collection.contractAddress, // Assuming this is where the collection address is stored
+            collection_addr: nft.collection.contractAddress, 
             token_id: nft.tokenId.toString(),
           }
         };
@@ -346,13 +346,16 @@ const Claim = () => {
           value: MsgExecuteContract.fromPartial({
             sender: wallet?.address,
             msg: toUtf8(JSON.stringify(claimMsg)),
-            contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j"
+            contract: `${process.env.NEXT_PUBLIC_STAKE_CONTRACT!}`
           })
         };
       });
 
+    // Abort if there are no NFTs selected for reward  
+    if (!claimMsgs || claimMsgs.length === 0) return;
+
   // Calculate the total gas based on the number of selected NFTs
-  const totalGas = Math.ceil(claimMsgs.length) * 5499999;
+  const totalGas = Math.ceil(claimMsgs.length) * 3499999;
 
   tx(claimMsgs, { gas: totalGas }, () => {
       router.push('/stake')
@@ -370,7 +373,7 @@ const Claim = () => {
   return (
     <main>
       <div className="flex flex-col space-y-2 lg:items-center lg:space-y-0 lg:flex-row lg:justify-between">
-        <Header>Stake Frogztrik NFTs</Header>
+      <Header>{`${process.env.NEXT_PUBLIC_APP_HEADER!}`}</Header>
       </div>
       <div className="grid grid-cols-1 gap-8 mt-3 mb-4 lg:mb-0 lg:mt-4 2xl:mt-6 lg:grid-cols-2">
         <div>

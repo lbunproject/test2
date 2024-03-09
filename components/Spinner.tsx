@@ -24,5 +24,6 @@ export default function Spinner({ className }: { className?: string }) {
 }
 
 export function LogoSpinner() {
-  return <img src="/logo.png" className="w-12 h-12 animate-spin" />;
+  return <img src={"/" + `${process.env.NEXT_PUBLIC_REWARD_ICON}`} className="w-12 h-12 animate-spin" />;
+
 }

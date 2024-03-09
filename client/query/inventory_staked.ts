@@ -25,9 +25,9 @@ export default async function queryStakedInventory(address: string) {
   let collectionsList: CollectionInfo[] = [];
   let collectionAttributes: CollectionAttribute[] = [];
   let tokenList: Media[] = [];
-  let stakeContractAddr = "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j";
+  let stakeContractAddr = `${process.env.NEXT_PUBLIC_STAKE_CONTRACT!}`;
 
-  const apiEndpoint = "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections.json";
+  const apiEndpoint = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/${process.env.NEXT_PUBLIC_COLLECTION_JSON}`;
   try {
     const res = await fetch(apiEndpoint);
     const json = await res.json();
@@ -44,7 +44,7 @@ export default async function queryStakedInventory(address: string) {
       ipfsJSONPrefix: collection.ipfsJSONPrefix,
       ipfsImagePrefix: collection.ipfsImagePrefix,
       collectionId: collection.id,
-      image: collection.image,
+      image: collection.ipfsImagePrefix + "1.png",
       ownedNFTs: [] // Initialize the owned NFTs array
     }));
 
@@ -107,7 +107,7 @@ export default async function queryStakedInventory(address: string) {
           creator: nftInfo.extension.creator || "Unknown",
           owner: stakeContractAddr,
           tokenUri: nftInfo.token_uri,
-          name:  earnedRewards + ' sFROG' /*nftInfo.extension.name || `NFT ${validStakedNft.token_id}`*/,
+          name:  earnedRewards + " " +`${process.env.NEXT_PUBLIC_REWARD_DENOM!}`,
           description: nftInfo.extension.description || "No description",
           image: nftInfo.extension.image,
           collection: {

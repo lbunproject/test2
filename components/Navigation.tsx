@@ -180,7 +180,7 @@ export default function Navigation({
 
       <div className="flex flex-col flex-1 lg:hidden">
         <div className="relative z-10 flex items-center justify-between flex-shrink-0 h-16 border-b border-white/10 bg-firefly lg:border-none">
-          <img src="/logo.png" className="w-auto h-10 ml-4"></img>
+          <img src={"/" + `${process.env.NEXT_PUBLIC_PP_ICON}`} className="w-auto h-10 ml-4"></img>
           <button
             type="button"
             className="h-full px-5 text-white border-l border-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white lg:hidden"

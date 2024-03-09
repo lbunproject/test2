@@ -365,7 +365,7 @@ const Stake = () => {
 
         const stakeMsg = {
           send_nft: {
-            contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j", //Staking contract
+            contract: `${process.env.NEXT_PUBLIC_STAKE_CONTRACT!}`, //Staking contract
             token_id: nft.tokenId.toString(),
             msg: encodedInnerMsg
           }
@@ -384,26 +384,25 @@ const Stake = () => {
     // Abort if there are not NFTs to Stake  
     if (!stakeMsgs || stakeMsgs.length === 0) return;
 
-    // Fee portion of the transaction
-    const encoder = new TextEncoder();
-    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "collection_addr": "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j" } }))));
-
+    const stakeFeeSelected = localStorage.getItem('stakeFeeSelected');
     let feeAmount = 0;
     let feeCw20Address = "";
 
-    const stakeFeeSelected = localStorage.getItem('stakeFeeSelected');
+    // Fee portion of the transaction
+    const encoder = new TextEncoder();
+    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "denom": '"' + stakeFeeSelected + '"' } }))));
 
-    if (stakeFeeSelected === "BASE") {
-      feeCw20Address = "terra1uewxz67jhhhs2tj97pfm2egtk7zqxuhenm4y4m";
-      feeAmount = Math.ceil(5 * 1000000 * stakeMsgs.length);
-    } else if (stakeFeeSelected === "FROG") {
-      feeCw20Address = "terra1wez9puj43v4s25vrex7cv3ut3w75w4h6j5e537sujyuxj0r5ne2qp9uwl9";
-      feeAmount = Math.ceil(10 * 1000000 * stakeMsgs.length);
-    }
+    if (stakeFeeSelected === `${process.env.NEXT_PUBLIC_FEE_OPTION_ONE!}`) {
+      feeCw20Address = `${process.env.NEXT_PUBLIC_FEE_ADDR_OPTION_ONE!}`;
+      feeAmount = Math.ceil(Number(`${process.env.NEXT_PUBLIC_FEE_AMOUNT_OPTION_ONE!}`) * 1000000 * stakeMsgs.length);
+    } else if (stakeFeeSelected === `${process.env.NEXT_PUBLIC_FEE_DENOM_OPTION_TWO!}`) {
+      feeCw20Address = `${process.env.NEXT_PUBLIC_FEE_ADDR_OPTION_TWO!}`;
+      feeAmount = Math.ceil(Number(`${process.env.NEXT_PUBLIC_FEE_AMOUNT_OPTION_TWO!}`)* 1000000 * stakeMsgs.length);
+    } else {return}
 
     const cw20FeeMsg = {
       send: {
-        contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j", //NFT Staking contract
+        contract: `${process.env.NEXT_PUBLIC_STAKE_CONTRACT!}`, //NFT Staking contract
         amount: feeAmount.toString(),
         msg: encodedMsg,
       }
@@ -441,7 +440,7 @@ const Stake = () => {
   return (
     <main>
       <div className="flex flex-col space-y-2 lg:items-center lg:space-y-0 lg:flex-row lg:justify-between">
-        <Header>Stake Frogztrik NFTs</Header>
+        <Header>{`${process.env.NEXT_PUBLIC_APP_HEADER!}`}</Header>
       </div>
       <div className="grid grid-cols-1 gap-8 mt-3 mb-4 lg:mb-0 lg:mt-4 2xl:mt-6 lg:grid-cols-2">
         <div>
@@ -517,7 +516,6 @@ const Stake = () => {
                 onChange={(e) => handleSetStakeFeeDenomination(e.target.value)}
                 className="w-32 border bg-firefly rounded-lg border-white/10 focus:ring focus:ring-primary ring-offset-firefly px-4 py-2.5 text-white"
               >
-                <option value=''></option>
                 <option value="FROG">10 FROG</option>
                 <option value="BASE">5 BASE</option>
               </select>

@@ -18,7 +18,7 @@ export default async function queryWalletInventory(address: string) {
   let collectionsList: CollectionInfo[] = [];
   let tokenList: Media[] = [];
 
-  const apiEndpoint = "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections.json";
+  const apiEndpoint = `${process.env.NEXT_PUBLIC_BLOCK_EXPLORER}/${process.env.NEXT_PUBLIC_COLLECTION_JSON!}`;
   try {
     const res = await fetch(apiEndpoint);
     const json = await res.json();
@@ -35,7 +35,7 @@ export default async function queryWalletInventory(address: string) {
       ipfsJSONPrefix: collection.ipfsJSONPrefix,
       ipfsImagePrefix: collection.ipfsImagePrefix,
       collectionId: collection.id,
-      image: collection.image,
+      image: collection.ipfsImagePrefix + "1.png",
       ownedNFTs: [] // Initialize the owned NFTs array
     }));
 

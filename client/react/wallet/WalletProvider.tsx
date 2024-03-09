@@ -21,8 +21,8 @@ export default function WalletProvider({
         name: "Stargaze",
         description:
           "Buy and sell goods and services on the world's foremost crypto goods exchange",
-        url: "https://www.stargazeprotocol.zone",
-        icons: ["https://i.ibb.co/YWKKR5Y/logo.png"],
+        url: "https://www.protocol.zone",
+        icons: ["https://i.ibb.co/logo.png"],
       }}
       chainInfoOverrides={ChainInfos}
     >
