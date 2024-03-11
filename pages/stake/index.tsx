@@ -318,7 +318,7 @@ const Stake = () => {
   }
 
   const handleInventoryItemClick = useCallback(
-    (nft: Media) => {
+    (nft: Media, section: string) => {
       let target: SelectTarget
 
       switch (currentTab) {
@@ -332,6 +332,15 @@ const Stake = () => {
 
       if (selectedPeerNfts.has(getNftMod(nft))) target = SelectTarget.Peer
       if (selectedUserNfts.has(getNftMod(nft))) target = SelectTarget.User
+
+      if (section == 'main_section' && selectedUserNfts.size == 6) {
+        return toaster.toast({
+          title: 'Max Selected',
+          message:
+          'Up to 6 NFTs may be selected per transaction.',
+          type: ToastTypes.Warning,
+        })
+      }
 
       selectNft(target, nft)
     },
@@ -455,7 +464,7 @@ const Stake = () => {
             <Inventory
               isLoading={isLoadingCurrentTab}
               nfts={inventoryNfts || []}
-              handleClick={handleInventoryItemClick}
+              handleClick={(nft) => handleInventoryItemClick(nft, 'main_section')}
               input={currentTab === 'peer'}
               inputPlaceholder="Enter peer address..."
               inputOnChange={(e) => {
@@ -498,7 +507,7 @@ const Stake = () => {
                     selectedUserNfts.has(getNftMod(nft)),
                   ) || []
                 }
-                handleClick={handleInventoryItemClick}
+                handleClick={(nft) => handleInventoryItemClick(nft, 'selected_section')}
                 small
               />
             </div>

@@ -321,7 +321,7 @@ const Unstake = () => {
   }
 
   const handleInventoryItemClick = useCallback(
-    (nft: Media) => {
+    (nft: Media, section: string) => {
       let target: SelectTarget
 
       switch (currentTab) {
@@ -335,6 +335,16 @@ const Unstake = () => {
 
       if (selectedPeerNfts.has(getNftMod(nft))) target = SelectTarget.Peer
       if (selectedUserNfts.has(getNftMod(nft))) target = SelectTarget.User
+
+
+      if (section == 'main_section' && selectedUserNfts.size == 6) {
+        return toaster.toast({
+          title: 'Max Selected',
+          message:
+          'Up to 6 NFTs may be selected per transaction.',
+          type: ToastTypes.Warning,
+        })
+      }
 
       selectNft(target, nft)
     },
@@ -448,7 +458,7 @@ const Unstake = () => {
             <Inventory
               isLoading={isLoadingCurrentTab}
               nfts={inventoryNfts || []}
-              handleClick={handleInventoryItemClick}
+              handleClick={(nft) => handleInventoryItemClick(nft, 'main_section')}
               input={currentTab === 'peer'}
               inputPlaceholder="Enter peer address..."
               inputOnChange={(e) => {
@@ -491,29 +501,29 @@ const Unstake = () => {
                     selectedUserNfts.has(getNftMod(nft)),
                   ) || []
                 }
-                handleClick={handleInventoryItemClick}
+                handleClick={(nft) => handleInventoryItemClick(nft, 'selected_section')}
                 small
               />
             </div>
           </div>
           <div className="lg:h-[4vh] flex flex-col items-center space-y-2 sm:flex-row sm:items-center sm:justify-center sm:space-x-8"
             style={{ marginTop: '10px', marginRight: '0px', marginBottom: '0px', marginLeft: '4px' }}>
-          {/*<FeeDenomDropdown onChange={handleSetStakeFeeDenomination} />*/}
-          <div className="flex items-center justify-center space-x-5 mt-2">
-            <label htmlFor="fee-denomination" className="block text-sm font-medium text-white/75">
-              Fee
-            </label>
-            <select
-              id="fee-denomination"
-              value={unstakeFeeSelected}
-              onChange={(e) => handleSetUnStakeFeeDenomination(e.target.value)}
-              className="w-32 border bg-firefly rounded-lg border-white/10 focus:ring focus:ring-primary ring-offset-firefly px-4 py-2.5 text-white"
-            >
-              <option value=""></option>
-              <option value="FROG">10 FROG</option>
-              <option value="BASE">5 BASE</option>
-            </select>
-          </div>
+            {/*<FeeDenomDropdown onChange={handleSetStakeFeeDenomination} />*/}
+            <div className="flex items-center justify-center space-x-5 mt-2">
+              <label htmlFor="fee-denomination" className="block text-sm font-medium text-white/75">
+                Fee
+              </label>
+              <select
+                id="fee-denomination"
+                value={unstakeFeeSelected}
+                onChange={(e) => handleSetUnStakeFeeDenomination(e.target.value)}
+                className="w-32 border bg-firefly rounded-lg border-white/10 focus:ring focus:ring-primary ring-offset-firefly px-4 py-2.5 text-white"
+              >
+                <option value=""></option>
+                <option value="FROG">10 FROG</option>
+                <option value="BASE">5 BASE</option>
+              </select>
+            </div>
             <button
               onClick={handleUnstakeNfts}
               disabled={unstakeFeeSelected === ""}
