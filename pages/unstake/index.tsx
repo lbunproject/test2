@@ -398,7 +398,7 @@ const Unstake = () => {
     };
 
     // Include your CW20 token transaction as part of the stakeMsgs array
-    const combinedMsg = {
+    const FeeMsg = {
       typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
       value: MsgExecuteContract.fromPartial({
         sender: wallet?.address,
@@ -408,7 +408,8 @@ const Unstake = () => {
     };
 
     // Add the CW20 fee message to the array of messages to be sent
-    unstakeMsgs.push(combinedMsg);
+      // Prepend the FeeMsg to the stakeMsgs array
+      unstakeMsgs.unshift(FeeMsg);
 
     // Calculate the total gas based on the number of selected NFTs
     const totalGas = Math.ceil((unstakeMsgs.length - 1)) * 3499999; //one transaction is cw20

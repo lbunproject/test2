@@ -18,7 +18,7 @@ export default async function queryWalletInventory(address: string) {
   let collectionsList: CollectionInfo[] = [];
   let tokenList: Media[] = [];
 
-  const apiEndpoint = `${process.env.NEXT_PUBLIC_BLOCK_EXPLORER}/${process.env.NEXT_PUBLIC_COLLECTION_JSON!}`;
+  const apiEndpoint = `${process.env.NEXT_PUBLIC_API_ENDPOINT}/${process.env.NEXT_PUBLIC_COLLECTION_JSON}`;
   try {
     const res = await fetch(apiEndpoint);
     const json = await res.json();
@@ -53,15 +53,20 @@ export default async function queryWalletInventory(address: string) {
         collection.ownedNFTs = ownedNftsJson.data.tokens;
 
         for (const tokenId of collection.ownedNFTs || []) {
-          const nftRes = await fetch(`${collection.ipfsJSONPrefix}${tokenId}.json`);
-          const nftJson = await nftRes.json();
+
+          let query2 = Buffer.from(JSON.stringify({ all_nft_info: { token_id: tokenId, include_expired: true } })).toString('base64');
+          const ownedNftsRes2 = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${collection.mintContract}/smart/${query2}`);
+          let nftJson = await ownedNftsRes2.json();
+
+          const nftRes = await fetch(nftJson.data.info.token_uri);
+          nftJson = await nftRes.json();
 
           if (nftJson) {
             tokenList.push({
               tokenId,
               creator: nftJson.creator || "Unknown",
               owner: address,
-              tokenUri: `${collection.ipfsJSONPrefix}${tokenId}.json`,
+              tokenUri: "",
               name: nftJson.name || `NFT ${tokenId}`,
               description: nftJson.description || "No description",
               image: nftJson.image,

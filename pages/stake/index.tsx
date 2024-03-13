@@ -392,7 +392,7 @@ const Stake = () => {
     const encoder = new TextEncoder();
     let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "denom": '"' + stakeFeeSelected + '"' } }))));
 
-    if (stakeFeeSelected === `${process.env.NEXT_PUBLIC_FEE_OPTION_ONE!}`) {
+    if (stakeFeeSelected === `${process.env.NEXT_PUBLIC_FEE_DENOM_OPTION_ONE!}`) {
       feeCw20Address = `${process.env.NEXT_PUBLIC_FEE_ADDR_OPTION_ONE!}`;
       feeAmount = Math.ceil(Number(`${process.env.NEXT_PUBLIC_FEE_AMOUNT_OPTION_ONE!}`) * 1000000 * stakeMsgs.length);
     } else if (stakeFeeSelected === `${process.env.NEXT_PUBLIC_FEE_DENOM_OPTION_TWO!}`) {
@@ -409,7 +409,7 @@ const Stake = () => {
     };
 
     // Include your CW20 token transaction as part of the stakeMsgs array
-    const combinedMsg = {
+    const FeeMsg = {
       typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
       value: MsgExecuteContract.fromPartial({
         sender: wallet?.address,
@@ -419,11 +419,14 @@ const Stake = () => {
     };
 
     // Add the CW20 fee message to the array of messages to be sent
-    stakeMsgs.push(combinedMsg);
+    //stakeMsgs.push(FeeMsg);
+      // Prepend the FeeMsg to the stakeMsgs array
+    stakeMsgs.unshift(FeeMsg);
 
     // Calculate the total gas based on the number of selected NFTs
     const totalGas = Math.ceil((stakeMsgs.length - 1)) * 3499999; //one transaction is cw20
 
+    //tx([FeeMsg], { gas: totalGas }, () => {
     tx(stakeMsgs, { gas: totalGas }, () => {
       router.push('/unstake');
     });
