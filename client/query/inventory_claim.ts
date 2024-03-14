@@ -25,7 +25,7 @@ export default async function queryClaimInventory(address: string) {
   let collectionsList: CollectionInfo[] = [];
   let collectionAttributes: CollectionAttribute[] = [];
   let tokenList: Media[] = [];
-  let stakeContractAddr = "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j";
+  let stakeContractAddr = "terra1zvv9jt7gw9ct57dkk8ucphha8gcprzt65ynjsyfcm66dkxau99wswwar8h";
 
   const apiEndpoint = "https://raw.githubusercontent.com/lbunproject/BASEswap-api-price/main/public/stake_collections.json";
   try {
@@ -108,7 +108,7 @@ export default async function queryClaimInventory(address: string) {
           creator: nftInfo.extension.creator || "Unknown",
           owner: stakeContractAddr,
           tokenUri: nftInfo.token_uri,
-          name: earnedRewards + ' sFROG ',
+          name: earnedRewards + ' TADF ',
           description: nftInfo.extension.description || "No description",
           image: nftInfo.extension.image,
           collection: {

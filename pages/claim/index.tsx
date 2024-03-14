@@ -355,7 +355,7 @@ const Claim = () => {
           value: MsgExecuteContract.fromPartial({
             sender: wallet?.address,
             msg: toUtf8(JSON.stringify(claimMsg)),
-            contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j"
+            contract: "terra1zvv9jt7gw9ct57dkk8ucphha8gcprzt65ynjsyfcm66dkxau99wswwar8h"
           })
         };
       });
@@ -380,6 +380,9 @@ const Claim = () => {
     <main>
       <div className="flex flex-col space-y-2 lg:items-center lg:space-y-0 lg:flex-row lg:justify-between">
         <Header>Stake Frogztrik NFTs</Header>
+      </div>
+      <div className="flex items-center mt-0">
+        TADF Rewards
       </div>
       <div className="grid grid-cols-1 gap-8 mt-3 mb-4 lg:mb-0 lg:mt-4 2xl:mt-6 lg:grid-cols-2">
         <div>

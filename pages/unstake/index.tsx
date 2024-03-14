@@ -379,7 +379,7 @@ const Unstake = () => {
           value: MsgExecuteContract.fromPartial({
             sender: wallet?.address,
             msg: toUtf8(JSON.stringify(unstakeMsg)),
-            contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j"
+            contract: "terra1zvv9jt7gw9ct57dkk8ucphha8gcprzt65ynjsyfcm66dkxau99wswwar8h"
           })
         };
       });
@@ -389,7 +389,7 @@ const Unstake = () => {
 
     // Fee portion of the transaction
     const encoder = new TextEncoder();
-    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "collection_addr": "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j" } }))));
+    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "collection_addr": "terra1zvv9jt7gw9ct57dkk8ucphha8gcprzt65ynjsyfcm66dkxau99wswwar8h" } }))));
 
     let feeAmount = 0;
     let feeCw20Address = "";
@@ -406,14 +406,14 @@ const Unstake = () => {
 
     const cw20FeeMsg = {
       send: {
-        contract: "terra15rg0rm9x8qfjjgj6jwd0l9w9kdl8u3lsmwpjk2y4gx0hrafggfzqjv4p8j", //NFT Staking contract
+        contract: "terra1zvv9jt7gw9ct57dkk8ucphha8gcprzt65ynjsyfcm66dkxau99wswwar8h", //NFT Staking contract
         amount: feeAmount.toString(),
         msg: encodedMsg,
       }
     };
 
     // Include your CW20 token transaction as part of the stakeMsgs array
-    const combinedMsg = {
+    const FeeMsg = {
       typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
       value: MsgExecuteContract.fromPartial({
         sender: wallet?.address,
@@ -423,7 +423,8 @@ const Unstake = () => {
     };
 
     // Add the CW20 fee message to the array of messages to be sent
-    unstakeMsgs.push(combinedMsg);
+    // Prepend the FeeMsg to the stakeMsgs array
+    unstakeMsgs.unshift(FeeMsg);
 
     // Calculate the total gas based on the number of selected NFTs
     const totalGas = Math.ceil((unstakeMsgs.length)) * 5499999; //one transaction is cw20
@@ -445,6 +446,9 @@ const Unstake = () => {
     <main>
       <div className="flex flex-col space-y-2 lg:items-center lg:space-y-0 lg:flex-row lg:justify-between">
         <Header>Stake Frogztrik NFTs</Header>
+      </div>
+      <div className="flex items-center mt-0">
+        TADF Rewards
       </div>
       <div className="grid grid-cols-1 gap-8 mt-3 mb-4 lg:mb-0 lg:mt-4 2xl:mt-6 lg:grid-cols-2">
         <div>
