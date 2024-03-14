@@ -381,6 +381,9 @@ const Claim = () => {
       <div className="flex flex-col space-y-2 lg:items-center lg:space-y-0 lg:flex-row lg:justify-between">
         <Header>Stake Frogztrik NFTs</Header>
       </div>
+      <div className="flex items-center mt-0">
+        sFROG Rewards
+      </div>
       <div className="grid grid-cols-1 gap-8 mt-3 mb-4 lg:mb-0 lg:mt-4 2xl:mt-6 lg:grid-cols-2">
         <div>
 
