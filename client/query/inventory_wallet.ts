@@ -5,7 +5,8 @@ type CollectionInfo = {
   symbol: string;
   title: string;
   description: string;
-  mintContract: string;
+  collectionContract: string;
+  nftContract: string;
   ipfsJSONPrefix: string;
   ipfsImagePrefix: string;
   collectionId: number;
@@ -31,49 +32,52 @@ export default async function queryWalletInventory(address: string) {
       symbol: collection.symbol,
       title: collection.title,
       description: collection.description,
-      mintContract: collection.mintContract,
+      collectionContract: collection.collection_contract,
+      nftContract: collection.nft_contract,
       ipfsJSONPrefix: collection.ipfsJSONPrefix,
       ipfsImagePrefix: collection.ipfsImagePrefix,
       collectionId: collection.id,
-      image: collection.ipfsImagePrefix + "1.png",
+      image: collection.ipfsImagePrefix + "QmVq9Ux1NDjApHPzUKQrCYzXJ26cShSgTGkT9eLbz6pFiu",
       ownedNFTs: [] // Initialize the owned NFTs array
     }));
 
     for (let collection of collectionsList) {
       // Query for dynamic address
-      let query = Buffer.from(JSON.stringify({ tokens: { owner: address } })).toString('base64');
+      let query = Buffer.from(JSON.stringify({ owner_all_token_info: { owner: address } })).toString('base64');
       await processQuery(query, collection);
     }
 
     async function processQuery(query: string, collection: any) {
-      const ownedNftsRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${collection.mintContract}/smart/${query}`);
+      const ownedNftsRes = await fetch(`https://terra-classic-lcd.publicnode.com/cosmwasm/wasm/v1/contract/${collection.collectionContract}/smart/${query}`);
       const ownedNftsJson = await ownedNftsRes.json();
 
-      if (ownedNftsJson && ownedNftsJson.data && Array.isArray(ownedNftsJson.data.tokens)) {
-        collection.ownedNFTs = ownedNftsJson.data.tokens;
+      if (ownedNftsJson && ownedNftsJson.data && Array.isArray(ownedNftsJson.data.data)) {
+        collection.ownedNFTs = ownedNftsJson.data.data;
 
-        for (const tokenId of collection.ownedNFTs || []) {
+        for (const tokens of collection.ownedNFTs || []) {
 
-          let query2 = Buffer.from(JSON.stringify({ all_nft_info: { token_id: tokenId, include_expired: true } })).toString('base64');
-          const ownedNftsRes2 = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${collection.mintContract}/smart/${query2}`);
+          let token_Id = tokens.token_id 
+
+          let query2 = Buffer.from(JSON.stringify({ all_nft_info: { token_id: token_Id } })).toString('base64');
+          const ownedNftsRes2 = await fetch(`https://terra-classic-lcd.publicnode.com/cosmwasm/wasm/v1/contract/${collection.nftContract}/smart/${query2}`);
           let nftJson = await ownedNftsRes2.json();
 
-          const nftRes = await fetch(nftJson.data.info.token_uri);
-          nftJson = await nftRes.json();
+          //const nftRes = await fetch(nftJson.data.info.token_uri);
+          //nftJson = await nftRes.json();
 
           if (nftJson) {
             tokenList.push({
-              tokenId,
+              tokenId :token_Id,
               creator: nftJson.creator || "Unknown",
               owner: address,
               tokenUri: "",
-              name: nftJson.name || `NFT ${tokenId}`,
+              name: nftJson.data.info.extension.name || `NFT ${token_Id}`,
               description: nftJson.description || "No description",
-              image: nftJson.image,
+              image: nftJson.data.info.extension.image,
               collection: {
-                name: collection.title,
+                name: `NFT ${token_Id}`, //collection.title,
                 symbol: collection.symbol,
-                contractAddress: collection.mintContract,
+                contractAddress: collection.nftContract,
                 creator: "",
                 description: "",
                 image: ""

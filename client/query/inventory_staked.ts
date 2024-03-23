@@ -5,7 +5,8 @@ type CollectionInfo = {
   symbol: string;
   title: string;
   description: string;
-  mintContract: string;
+  collectionContract: string;
+  nftContract: string;
   ipfsJSONPrefix: string;
   ipfsImagePrefix: string;
   collectionId: number;
@@ -14,7 +15,7 @@ type CollectionInfo = {
 };
 
 type CollectionAttribute = {
-  collectionContract: string;
+  nftContract: string;
   cycle?: number;
   claim_delay?: number;
   reward_amount?: string;
@@ -40,24 +41,26 @@ export default async function queryStakedInventory(address: string) {
       symbol: collection.symbol,
       title: collection.title,
       description: collection.description,
-      mintContract: collection.mintContract,
+      collectionContract: collection.collection_contract,
+      nftContract: collection.nft_contract,
       ipfsJSONPrefix: collection.ipfsJSONPrefix,
       ipfsImagePrefix: collection.ipfsImagePrefix,
       collectionId: collection.id,
-      image: collection.ipfsImagePrefix + "1.png",
+      image: collection.ipfsImagePrefix + "QmVq9Ux1NDjApHPzUKQrCYzXJ26cShSgTGkT9eLbz6pFiu",
       ownedNFTs: [] // Initialize the owned NFTs array
     }));
 
+
     // Fetch additional collection info from the CosmWasm contract
-    const additionalInfoRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/eyJnZXRfY29sbGVjdGlvbnMiOnt9fQ==`);
+    const additionalInfoRes = await fetch(`https://terra-classic-lcd.publicnode.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/eyJnZXRfY29sbGVjdGlvbnMiOnt9fQ==`);
     const additionalInfoJson = await additionalInfoRes.json();
     const additionalInfo = additionalInfoJson.data;
 
     // Create collectionAttributes array
     collectionAttributes = collectionsList.map((collection) => {
-      const match = additionalInfo.find((info: any) => info.collection_addr === collection.mintContract);
+      const match = additionalInfo.find((info: any) => info.collection_addr === collection.nftContract);
       return {
-        collectionContract: collection.mintContract, // Correctly reference the contract
+        nftContract: collection.nftContract, // Correctly reference the contract
         cycle: match?.cycle || 0, // Provide default values if not found
         claim_delay: match?.claim_delay || 0,
         reward_amount: match?.reward_amount || "",
@@ -66,8 +69,8 @@ export default async function queryStakedInventory(address: string) {
     
     // Fetch staked NFTs
     let query = Buffer.from(JSON.stringify({ get_stakings_by_owner: { owner: address } })).toString('base64');
-    const stakedNftsRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/${query}`);
-    const stakedNftsJson = await stakedNftsRes.json();
+    const stakedNftsRes = await fetch(`https://terra-classic-lcd.publicnode.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/${query}`);
+    let stakedNftsJson = await stakedNftsRes.json();
 
     // Filter valid staked NFTs
     const validStakedNfts = stakedNftsJson.data.filter((nft: { start_timestamp: any; end_timestamp: string; }) =>
@@ -83,10 +86,11 @@ export default async function queryStakedInventory(address: string) {
       
       if (myStakedNftsJson && myStakedNftsJson.data.info) {
         const nftInfo = myStakedNftsJson.data.info;
+        let check = Date.now() * 1000000
         let staking_time = ((Date.now() * 1000000) - (validStakedNft.start_timestamp)) / 1000000000; //in seconds
 
         // Find the collection attribute for this NFT
-        const collectionAttribute = collectionAttributes.find(attr => attr.collectionContract === validStakedNft.token_address);
+        const collectionAttribute = collectionAttributes.find(attr => attr.nftContract === validStakedNft.token_address);
 
         //Access attributes;   collectionAttribute?.cycle?.toString() ?? "", // Get cycle with Optional Chaining
         const staking_cycles = staking_time / Number(collectionAttribute?.cycle) ?? 1  //staking cycles
@@ -98,8 +102,19 @@ export default async function queryStakedInventory(address: string) {
           delay_time = Math.ceil(delay_time)
         }
 
+        const data = JSON.parse(JSON.stringify(additionalInfo[0]));
+        const levels = [data.lvl2, data.lvl3, data.lvl4, data.lvl5, data.lvl6];
+        const multipliers = [data.mul2, data.mul3, data.mul4, data.mul5, data.mul6];
+        let multiplier = 1;
+        for (let i = 0; i < levels.length; i++) {
+          if (levels[i].includes(Number(validStakedNft.token_id))) {
+              multiplier = (multipliers[i]/100);
+              break
+          }
+        }
+
         //Info to display
-        const earnedRewards = ((Number(collectionAttribute?.reward_amount) / 1000000) * Number(staking_cycles)).toFixed(1)
+        const earnedRewards = (((Number(collectionAttribute?.reward_amount) * multiplier) / 1000000) * Number(staking_cycles)).toFixed(2)
         //const inDays = '(in ' + String(delay_time.toFixed(0)) + " days)"
 
         tokenList.push({
