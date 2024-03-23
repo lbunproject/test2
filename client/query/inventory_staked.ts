@@ -138,6 +138,7 @@ export default async function queryStakedInventory(address: string) {
     );
   }
 
+  
   return tokenList;
 
 }
