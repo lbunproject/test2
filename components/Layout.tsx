@@ -4,13 +4,10 @@ import Navigation from "./Navigation";
 import { useRouter } from "next/router";
 
 import {
-  CubeIcon,
-  ArrowsUpDownIcon,
-  InboxStackIcon,
-  EnvelopeIcon,
   LockClosedIcon,
   LockOpenIcon,
   GiftIcon,
+  WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 import { useWallet } from "client";
 
@@ -19,28 +16,40 @@ export default function Layout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { wallet } = useWallet();
 
-  const connectedNavigation = wallet
-    ? [{
-          name: "Stake",
-          href: "/stake",
-          icon: LockClosedIcon,
-          current: router.asPath.split("/").includes("stake"),
-        },
-        {
-          name: "Unstake",
-          href: "/unstake",
-          icon: LockOpenIcon,
-          current: router.asPath.split("/").includes("unstake"),
-        },
-        {
-          name: "Claim",
-          href: "/claim",
-          icon: GiftIcon,
-          current: router.asPath.split("/").includes("claim"),
-        },
-      ]
-    : [];
-
+  let connectedNavigation = [
+    {
+      name: "Stake",
+      href: "/stake",
+      icon: LockClosedIcon,
+      current: router.asPath.split("/").includes("stake"),
+    },
+    {
+      name: "Unstake",
+      href: "/unstake",
+      icon: LockOpenIcon,
+      current: router.asPath.split("/").includes("unstake"),
+    },
+    {
+      name: "Claim",
+      href: "/claim",
+      icon: GiftIcon,
+      current: router.asPath.split("/").includes("claim"),
+    },
+  ];
+    
+  const managerAddresses = process.env.NEXT_PUBLIC_OWNER_MANAGER?.split(',') ?? [];
+  if (wallet && managerAddresses.includes(wallet.address)) {
+    connectedNavigation = [
+      ...connectedNavigation,
+      {
+        name: "Manage",
+        href: "/manage",
+        icon: WrenchScrewdriverIcon,
+        current: router.asPath.split("/").includes("manage"),
+      },
+    ];
+  }
+      
   const navigation = [
     /*{
       name: "Trade",
