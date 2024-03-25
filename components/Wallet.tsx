@@ -1,4 +1,4 @@
-import { SyntheticEvent, useCallback } from "react";
+import { useEffect, SyntheticEvent, useCallback } from "react";
 
 import copy from "copy-to-clipboard";
 import { useWallet } from "client";
@@ -35,7 +35,8 @@ const Action = ({
 
 export default function Wallet() {
   const [copied, setCopied] = useState<boolean>(false);
-
+  const [feeOptionOneBalance, setFeeOptionOneBalance] = useState<string>('0');
+  const [feeOptionTwoBalance, setFeeOptionTwoBalance] = useState<string>('0');
   const { wallet, connect, disconnect } = useWallet();
 
   const handleCopy = useCallback(
@@ -50,6 +51,38 @@ export default function Wallet() {
     },
     [wallet]
   );
+
+  async function fetchCW20Balance(cw20Address: string, userAddress: string): Promise<string> {
+
+    const query = `{"balance":{"address":"${userAddress}"}}`;
+    const encodedQuery = btoa(query);
+    const url = `https://terra-classic-lcd.publicnode.com/cosmwasm/wasm/v1/contract/${cw20Address}/smart/${encodedQuery}`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      const realBalance = (Number(data.data.balance) / 1000000).toFixed(2).toString();
+      return realBalance; // Assuming the response format includes { balance: "amount" }
+
+    } catch (error) {
+      console.error("Fetching CW20 balance failed:", error);
+      return '0';
+    }
+
+  }
+
+  // Fetch CW20 token balances when wallet is connected
+  useEffect(() => {
+    if (wallet && wallet.address) {
+      fetchCW20Balance(process.env.NEXT_PUBLIC_FEE_ADDR_OPTION_ONE!, wallet.address)
+        .then(balance => setFeeOptionOneBalance(balance));
+      fetchCW20Balance(process.env.NEXT_PUBLIC_FEE_ADDR_OPTION_TWO!, wallet.address)
+        .then(balance => setFeeOptionTwoBalance(balance));
+    }
+  }, [wallet]);
 
   return wallet ? (
     <div className="flex flex-row items-center justify-between px-4 py-3 mt-3 mb-4 text-white transition duration-150 ease-in-out border rounded-lg cursor-pointer lg:mx-3 lg:mb-0 group hover:border-white/50 border-white/10">
@@ -68,6 +101,17 @@ export default function Wallet() {
             .replace("$", "")}{" "}
           LUNC
         </p>
+        {/* Display CW20 token balances */}
+        <p className="text-xs font-light">
+          {feeOptionOneBalance} {process.env.NEXT_PUBLIC_FEE_DENOM_OPTION_ONE}
+        </p>
+        <p className="text-xs font-light">
+          {feeOptionTwoBalance} {process.env.NEXT_PUBLIC_FEE_DENOM_OPTION_TWO}
+        </p>
+      </div>
+
+      <div>
+
       </div>
 
       <div className="flex flex-row space-x-2 lg:hidden lg:group-hover:flex">
