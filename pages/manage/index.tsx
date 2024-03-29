@@ -22,6 +22,7 @@ const IndexPage: React.FC = () => {
 
   let [selectedLevel, setSelectedLevel] = useState(''); // State to store selected level
   let [nftNumbers, setNftNumbers] = useState(''); // State to store NFT numbers
+  let [rewardAmount, setRewardAmount] = useState(''); // State to store reward amount
 
   let [amount, setAmount] = useState('');
   let [transactionType, setTransactionType] = useState('Deposit');
@@ -299,6 +300,39 @@ const IndexPage: React.FC = () => {
   };
 
 
+  // Function to handle assigning NFTs to levels
+  const handleSetReward = async () => {
+
+    const collectionAddr = selectedCollectionAddress; // Make sure this is correctly set
+    const reward_amount = (Math.ceil(Number(rewardAmount) * 1000000)).toString();
+
+    const executeMsg = {
+      mod_reward: {
+        addr: collectionAddr,
+        reward: reward_amount
+      },
+    };
+
+    // Correctly encode the message for cosmjs
+    const msg = toUtf8(JSON.stringify(executeMsg));
+
+    const wrapperMsg = {
+      typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+      value: MsgExecuteContract.fromPartial({
+        contract: `${process.env.NEXT_PUBLIC_STAKE_CONTRACT!}`,
+        sender: wallet?.address, // The sender's address
+        msg: msg, // The encoded execute message
+      })
+    };
+
+    const totalGas = 1499999; // Adjust based on your contract's needs
+
+    tx([wrapperMsg], { gas: totalGas }, () => {
+      // Handle post-transaction logic. For example, navigating to another route
+      router.push('/manage');
+    });
+  };
+
   // Function to handle change in the NFT numbers input field
   const handleNftNumbersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove leading and trailing whitespaces and trailing comma
@@ -307,6 +341,16 @@ const IndexPage: React.FC = () => {
     input = input.replace(/[^0-9,]/g, '');
     // Update state with sanitized input
     setNftNumbers(input);
+  };
+
+  // Function to handle change in the NFT numbers input field
+  const handleSetRewardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Remove leading and trailing whitespaces and trailing comma
+    let input = e.target.value.trim();
+    // Validate input to allow only numbers and commas
+    input = input.replace(/[^0-9,]/g, '');
+    // Update state with sanitized input
+    setRewardAmount(input);
   };
 
   const handleTransaction = () => {
@@ -389,7 +433,7 @@ const IndexPage: React.FC = () => {
           </div>
         </div>
 
-        {/*
+
         {/* Enable/Disable Collection 
         <div className="mb-6 bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 ">
           <div className="mb-4 flex justify-between items-center">
@@ -415,42 +459,80 @@ const IndexPage: React.FC = () => {
           </div>
         </div> */}
 
-        {/* Assign NFT to Levels */}
-        <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 ">
-          <div className="mb-4 flex justify-between items-center">
-            <h3 className="text-xl font-bold leading-none text-gray-900">Assign NFT to Levels</h3>
-          </div>
-          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="mb-4 md:mb-0">
-              <label className="block mb-1 text-sm font-medium text-gray-700">Level:</label>
-              <select
-                className="border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5"
-                value={selectedLevel}
-                onChange={(e) => setSelectedLevel(e.target.value)}
-              >
-                <option value="">Select Rarity</option>
-                {rarities.map((rarity, index) => (
-                  <option key={rarity} value={rarity}>
-                    {rarity}
-                  </option>
-                ))}
-              </select>
+
+        {/* Set the reward for multiplier 1x */}
+        <div className="py-8">
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 ">
+            <div className="mb-4 flex justify-between items-center">
+              <h3 className="text-xl font-bold leading-none text-gray-900">Set Minimum Reward</h3>
             </div>
-            <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">NFT Token IDs:</label>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <input
                 type="text"
-                className="border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5"
-                value={nftNumbers}
-                onChange={handleNftNumbersChange}
-                placeholder="Enter IDs"
+                className="border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 max-w-[250px]"
+                value={rewardAmount}
+                onChange={handleSetRewardChange}
+                placeholder="0"
               />
+              <div className="flex-grow mb-4 md:mb-0">
+                <select
+                  className="border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5 max-w-[250px]"
+                  value={selectedCollectionAddress}
+                  onChange={(e) => setSelectedCollectionAddress(e.target.value)}
+                >
+                  {collectionAddresses.map((addr, index) => (
+                    <option key={index} value={addr}>
+                      {`${addr.substring(0, 5)}...${addr.substring(addr.length - 4)}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded min-w-[150px]" onClick={handleSetReward}>
+                Set
+              </button>
             </div>
           </div>
-          <div className="flex justify-start">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={handleAssignNFT}>
-              Assign NFT
-            </button>
+        </div>
+
+        {/* Assign NFT to Levels */}
+        <div className="py-8">
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 ">
+            <div className="mb-4 flex justify-between items-center">
+              <h3 className="text-xl font-bold leading-none text-gray-900">Assign NFT to Levels</h3>
+            </div>
+            <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="mb-4 md:mb-0">
+                <label className="block mb-1 text-sm font-medium text-gray-700">Level:</label>
+                <select
+                  className="border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5"
+                  value={selectedLevel}
+                  onChange={(e) => setSelectedLevel(e.target.value)}
+                >
+                  <option value="">Select Rarity</option>
+                  {rarities.map((rarity, index) => (
+                    <option key={rarity} value={rarity}>
+                      {rarity}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700">NFT Token IDs:</label>
+                <input
+                  type="text"
+                  className="border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5"
+                  value={nftNumbers}
+                  onChange={handleNftNumbersChange}
+                  placeholder="Enter IDs"
+                />
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={handleAssignNFT}>
+                Assign NFT
+              </button>
+            </div>
           </div>
         </div>
       </div>
