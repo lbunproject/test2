@@ -5,6 +5,9 @@ import Layout from "components/Layout";
 import Head from "next/head";
 import { ErrorInfo } from "react";
 import { Toaster } from "react-hot-toast";
+import { SignerOptions, wallets } from "cosmos-kit";
+import { ChainProvider } from "@cosmos-kit/react";
+import { assets, chains } from "chain-registry";
 
 import "animate.css";
 import "styles/globals.css";
