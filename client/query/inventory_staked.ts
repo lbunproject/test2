@@ -46,7 +46,7 @@ export default async function queryStakedInventory(address: string) {
       ipfsJSONPrefix: collection.ipfsJSONPrefix,
       ipfsImagePrefix: collection.ipfsImagePrefix,
       collectionId: collection.id,
-      image: collection.ipfsImagePrefix + "QmVq9Ux1NDjApHPzUKQrCYzXJ26cShSgTGkT9eLbz6pFiu",
+      image: collection.image,
       ownedNFTs: [] // Initialize the owned NFTs array
     }));
 
