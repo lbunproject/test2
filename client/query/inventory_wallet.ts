@@ -11,6 +11,9 @@ type CollectionInfo = {
   ipfsImagePrefix: string;
   collectionId: number;
   image: string;
+  staking_reward: string;
+  nft_rarities: string;
+  rarity_multiplier: string;
   ownedNFTs?: string[];
 };
 
@@ -32,12 +35,15 @@ export default async function queryWalletInventory(address: string) {
       symbol: collection.symbol,
       title: collection.title,
       description: collection.description,
-      collectionContract: collection.collection_contract,
-      nftContract: collection.nft_contract,
+      collectionContract: collection.collectionContract,
+      nftContract: collection.nftContract,
       ipfsJSONPrefix: collection.ipfsJSONPrefix,
       ipfsImagePrefix: collection.ipfsImagePrefix,
       collectionId: collection.id,
       image: collection.image,
+      staking_reward: collection.staking_reward,
+      nft_rarities: collection.nft_rarities,
+      rarity_multiplier: collection.rarity_multiplier,
       ownedNFTs: [] // Initialize the owned NFTs array
     }));
 
