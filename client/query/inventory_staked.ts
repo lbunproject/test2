@@ -130,7 +130,7 @@ export default async function queryStakedInventory(address: string) {
         if (process.env.NEXT_PUBLIC_Raritiy_MODE == "metadata") {
           
           let rarity = ""
-          if (nftInfo.extension.attributes[0].key == "rarity") {
+          if (nftInfo.extension.attributes[0].trait_type == "Rarity") {
             rarity = nftInfo.extension.attributes[0].value;
           }else{
             rarity = nftInfo.extension.attributes[1].value;
@@ -142,10 +142,11 @@ export default async function queryStakedInventory(address: string) {
           );
           // Find the index of the rarity in the nft_rarities array
           rarityIndex =
-            collection?.nft_rarities.indexOf(rarity.toString()) ?? -1;
+            collection?.nft_rarities.indexOf(rarity.toString()) ?? 0;
 
           // Get multiplier associated with the rarity
           multiplier = Number(collection?.rarity_multiplier[rarityIndex]) ?? 1;
+        
         } else {
           const data = JSON.parse(JSON.stringify(additionalInfo[0]));
           const levels = [
@@ -170,13 +171,14 @@ export default async function queryStakedInventory(address: string) {
             }
           }
         }
+
         //Info to display
         const earnedRewards = (
           ((Number(collectionAttribute?.reward_amount) * multiplier) /
             1000000) *
           Number(staking_cycles)
         ).toFixed(2);
-        //const inDays = '(in ' + String(delay_time.toFixed(0)) + " days)"
+        //const inDays = '(in ' + String(delay_time.toFixed(0)) + " days)"    
 
         tokenList.push({
           tokenId: validStakedNft.token_id,

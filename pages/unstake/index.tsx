@@ -506,8 +506,8 @@ const Unstake = () => {
               className="w-32 border bg-firefly rounded-lg border-white/10 focus:ring focus:ring-primary ring-offset-firefly px-4 py-2.5 text-white"
             >
               <option value=""></option>
-              <option value="FROG">10 FROG</option>
-              <option value="BASE">5 BASE</option>
+              <option value="FROG">{process.env.NEXT_PUBLIC_FEE_AMOUNT_OPTION_TWO} FROG</option>
+              <option value="BASE">{process.env.NEXT_PUBLIC_FEE_AMOUNT_OPTION_ONE} BASE</option>
             </select>
           </div>
             <button
