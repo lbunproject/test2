@@ -11,6 +11,8 @@ type CollectionInfo = {
   ipfsImagePrefix: string;
   collectionId: number;
   image: string;
+  nft_rarities: string[];
+  rarity_multiplier: string[];
   ownedNFTs?: string[];
 };
 
@@ -42,11 +44,13 @@ export default async function queryClaimInventory(address: string) {
       title: collection.title,
       description: collection.description,
       collectionContract: collection.collection_contract,
-      nftContract: collection.nft_contract,
+      nftContract: collection.nftContract,
       ipfsJSONPrefix: collection.ipfsJSONPrefix,
       ipfsImagePrefix: collection.ipfsImagePrefix,
       collectionId: collection.id,
       image: collection.image,
+      nft_rarities: collection.nft_rarities.split(","),
+      rarity_multiplier: collection.rarity_multiplier.split(","),
       ownedNFTs: [], // Initialize the owned NFTs array
     }));
 
@@ -97,7 +101,8 @@ export default async function queryClaimInventory(address: string) {
       const myClaimNftsJson = await myClaimNftsRes.json();
 
       if (myClaimNftsJson && myClaimNftsJson.data.info) {
-        const nftInfo = myClaimNftsJson.data.info;
+        const nftInfo = myClaimNftsJson.data.info; 
+        
         let staking_time =
           (validClaimNft.end_timestamp - validClaimNft.start_timestamp) /
           1000000000; //in seconds
@@ -115,29 +120,58 @@ export default async function queryClaimInventory(address: string) {
 
         unstaked_time =
           Number(collectionAttribute?.claim_delay) - unstaked_time;
-        if (unstaked_time < 0) {
+        if (unstaked_time < 0.01) {
           unstaked_time = 0;
         } else {
           unstaked_time = unstaked_time / (24 * 60 * 60); //in days
         }
 
-        const data = JSON.parse(JSON.stringify(additionalInfo[0]));
-        const levels = [data.lvl2, data.lvl3, data.lvl4, data.lvl5, data.lvl6];
-        const multipliers = [
-          data.mul2,
-          data.mul3,
-          data.mul4,
-          data.mul5,
-          data.mul6,
-        ];
+        // Get rarity
         let multiplier = 1;
-        for (let i = 0; i < levels.length; i++) {
-          if (levels[i].includes(Number(validClaimNft.token_id))) {
-            multiplier = multipliers[i] / 100;
-            break;
+        let rarityIndex = 0;
+        if (process.env.NEXT_PUBLIC_Raritiy_MODE == "metadata") {         
+           let rarity = ""
+              if (nftInfo.extension.attributes[0].trait_type == "Rarity") {
+                  rarity = nftInfo.extension.attributes[0].value;
+              }else{
+                   rarity = nftInfo.extension.attributes[1].value;
+              } 
+
+          // Find the collection corresponding to the staked NFT
+          const collection = collectionsList.find(
+            (coll) => coll.nftContract === validClaimNft.token_address
+          );
+          // Find the index of the rarity in the nft_rarities array
+          rarityIndex =
+            collection?.nft_rarities.indexOf(rarity.toString()) ?? 0;
+
+          // Get multiplier associated with the rarity
+          multiplier = Number(collection?.rarity_multiplier[rarityIndex]) ?? 1;
+        
+        } else {
+          const data = JSON.parse(JSON.stringify(additionalInfo[0]));
+          const levels = [
+            data.lvl2,
+            data.lvl3,
+            data.lvl4,
+            data.lvl5,
+            data.lvl6,
+          ];
+          const multipliers = [
+            data.mul2,
+            data.mul3,
+            data.mul4,
+            data.mul5,
+            data.mul6,
+          ];
+       
+          for (let i = 0; i < levels.length; i++) {
+            if (levels[i].includes(Number(validClaimNft.token_id))) {
+              multiplier = multipliers[i] / 100;
+              break;
           }
         }
-
+      }
         //Info to display
         const earnedRewards = (
           ((Number(collectionAttribute?.reward_amount) * multiplier) /
