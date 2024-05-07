@@ -129,12 +129,15 @@ export default async function queryStakedInventory(address: string) {
         let rarityIndex = 0;
         if (process.env.NEXT_PUBLIC_Raritiy_MODE == "metadata") {
           
-          let rarity = ""
-          if (nftInfo.extension.attributes[0].trait_type == "Rarity") {
-            rarity = nftInfo.extension.attributes[0].value;
-          }else{
-            rarity = nftInfo.extension.attributes[1].value;
-          }
+        let rarity = "";
+        const attributes = nftInfo.extension.attributes; 
+        if (attributes[0]?.trait_type === "Rarity") {
+          rarity = attributes[0]?.value;
+        } else if (attributes[1]?.trait_type === "Rarity") {
+          rarity = attributes[1]?.value;
+        } else {
+          console.log("No rarity found");
+        }
 
           // Find the collection corresponding to the staked NFT
           const collection = collectionsList.find(
@@ -180,7 +183,10 @@ export default async function queryStakedInventory(address: string) {
         ).toFixed(2);
         //const inDays = '(in ' + String(delay_time.toFixed(0)) + " days)"    
 
-        tokenList.push({
+        if (validStakedNft.token_id == 20){
+          console.log("this is it")}
+        
+          tokenList.push({
           tokenId: validStakedNft.token_id,
           creator: nftInfo.extension.creator || "Unknown",
           owner: stakeContractAddr,

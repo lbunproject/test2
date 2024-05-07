@@ -130,12 +130,16 @@ export default async function queryClaimInventory(address: string) {
         let multiplier = 1;
         let rarityIndex = 0;
         if (process.env.NEXT_PUBLIC_Raritiy_MODE == "metadata") {         
-           let rarity = ""
-              if (nftInfo.extension.attributes[0].trait_type == "Rarity") {
-                  rarity = nftInfo.extension.attributes[0].value;
-              }else{
-                   rarity = nftInfo.extension.attributes[1].value;
-              } 
+
+          let rarity = "";
+          const attributes = nftInfo.extension.attributes; 
+          if (attributes[0]?.trait_type === "Rarity") {
+            rarity = attributes[0]?.value;
+          } else if (attributes[1]?.trait_type === "Rarity") {
+            rarity = attributes[1]?.value;
+          } else {
+            console.log("No rarity found");
+          }
 
           // Find the collection corresponding to the staked NFT
           const collection = collectionsList.find(
