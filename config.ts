@@ -9,7 +9,7 @@ export interface ChainInfoWithExplorer extends ChainInfo {
 export const ChainInfos: ChainInfoWithExplorer[] = [
   {
     rpc: "https://terra-classic-rpc.publicnode.com:443",
-    rest: "https://columbus-lcd.terra.dev",
+    rest: "https://terra-classic-lcd.publicnode.com",
     chainId: "columbus-5",
     chainName: "LUNA Classic",
     stakeCurrency: {
