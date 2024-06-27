@@ -507,7 +507,7 @@ const Unstake = () => {
             >
               <option value=""></option>
               <option value="FROG">10 FROG</option>
-              <option value="BASE">5 BASE</option>
+              <option value="BASE">2 BASE</option>
             </select>
           </div>
             <button

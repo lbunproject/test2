@@ -520,7 +520,7 @@ const Stake = () => {
                 className="w-32 border bg-firefly rounded-lg border-white/10 focus:ring focus:ring-primary ring-offset-firefly px-4 py-2.5 text-white"
               >
                 <option value="FROG">10 FROG</option>
-                <option value="BASE">5 BASE</option>
+                <option value="BASE">2 BASE</option>
               </select>
             </div>
 
