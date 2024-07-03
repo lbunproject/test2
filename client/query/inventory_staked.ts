@@ -98,9 +98,19 @@ export default async function queryStakedInventory(address: string) {
           delay_time = Math.ceil(delay_time)
         }
 
+        const data = JSON.parse(JSON.stringify(additionalInfo[0]));
+        const levels = [data.lvl2, data.lvl3, data.lvl4, data.lvl5, data.lvl6];
+        const multipliers = [data.mul2, data.mul3, data.mul4, data.mul5, data.mul6];
+        let multiplier = 1;
+        for (let i = 0; i < levels.length; i++) {
+          if (levels[i].includes(Number(validStakedNft.token_id))) {
+              multiplier = (multipliers[i]/100);
+              break
+          }
+        }
+
         //Info to display
-        const earnedRewards = ((Number(collectionAttribute?.reward_amount) / 1000000) * Number(staking_cycles)).toFixed(1)
-        //const inDays = '(in ' + String(delay_time.toFixed(0)) + " days)"
+        const earnedRewards = (((Number(collectionAttribute?.reward_amount) * multiplier) / 1000000) * Number(staking_cycles)).toFixed(2)
 
         tokenList.push({
           tokenId: validStakedNft.token_id,
