@@ -52,7 +52,7 @@ export default async function queryStakedInventory(address: string) {
     const additionalInfoRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/eyJnZXRfY29sbGVjdGlvbnMiOnt9fQ==`);
     const additionalInfoJson = await additionalInfoRes.json();
     const additionalInfo = additionalInfoJson.data;
-
+ 
     // Create collectionAttributes array
     collectionAttributes = collectionsList.map((collection) => {
       const match = additionalInfo.find((info: any) => info.collection_addr === collection.mintContract);
@@ -61,9 +61,11 @@ export default async function queryStakedInventory(address: string) {
         cycle: match?.cycle || 0, // Provide default values if not found
         claim_delay: match?.claim_delay || 0,
         reward_amount: match?.reward_amount || "",
+        // Fetch levels and multipliers
       };
     });
-    
+
+
     // Fetch staked NFTs
     let query = Buffer.from(JSON.stringify({ get_stakings_by_owner: { owner: address } })).toString('base64');
     const stakedNftsRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/${query}`);
@@ -98,6 +100,7 @@ export default async function queryStakedInventory(address: string) {
           delay_time = Math.ceil(delay_time)
         }
 
+/*
         const data = JSON.parse(JSON.stringify(additionalInfo[0]));
         const levels = [data.lvl2, data.lvl3, data.lvl4, data.lvl5, data.lvl6];
         const multipliers = [data.mul2, data.mul3, data.mul4, data.mul5, data.mul6];
@@ -107,10 +110,10 @@ export default async function queryStakedInventory(address: string) {
               multiplier = (multipliers[i]/100);
               break
           }
-        }
+        }*/
 
         //Info to display
-        const earnedRewards = (((Number(collectionAttribute?.reward_amount) * multiplier) / 1000000) * Number(staking_cycles)).toFixed(2)
+       const earnedRewards = (((Number(collectionAttribute?.reward_amount) ) / 1000000) * Number(staking_cycles)).toFixed(2)
 
         tokenList.push({
           tokenId: validStakedNft.token_id,
