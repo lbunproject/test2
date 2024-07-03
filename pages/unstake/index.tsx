@@ -379,7 +379,7 @@ const Unstake = () => {
 
     // Fee portion of the transaction
     const encoder = new TextEncoder();
-    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "denom": '"' + unstakeFeeSelected + '"' } }))));
+    let encodedMsg = btoa(String.fromCharCode(...encoder.encode(JSON.stringify({ "pay_fee": { "denom": unstakeFeeSelected } }))));
 
     if (unstakeFeeSelected === `${process.env.NEXT_PUBLIC_FEE_DENOM_OPTION_ONE!}`) {
       feeCw20Address = `${process.env.NEXT_PUBLIC_FEE_ADDR_OPTION_ONE!}`;
@@ -409,7 +409,7 @@ const Unstake = () => {
 
     // Add the CW20 fee message to the array of messages to be sent
       // Prepend the FeeMsg to the stakeMsgs array
-      unstakeMsgs.unshift(FeeMsg);
+      //unstakeMsgs.unshift(FeeMsg);
 
     // Calculate the total gas based on the number of selected NFTs
     const totalGas = Math.ceil((unstakeMsgs.length - 1)) * 3499999; //one transaction is cw20
