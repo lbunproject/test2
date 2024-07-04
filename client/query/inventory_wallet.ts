@@ -5,15 +5,11 @@ type CollectionInfo = {
   symbol: string;
   title: string;
   description: string;
-  collectionContract: string;
-  nftContract: string;
+  mintContract: string;
   ipfsJSONPrefix: string;
   ipfsImagePrefix: string;
   collectionId: number;
   image: string;
-  staking_reward: string;
-  nft_rarities: string;
-  rarity_multiplier: string;
   ownedNFTs?: string[];
 };
 
@@ -35,55 +31,67 @@ export default async function queryWalletInventory(address: string) {
       symbol: collection.symbol,
       title: collection.title,
       description: collection.description,
-      collectionContract: collection.collectionContract,
-      nftContract: collection.nftContract,
+      mintContract: collection.mintContract,
       ipfsJSONPrefix: collection.ipfsJSONPrefix,
       ipfsImagePrefix: collection.ipfsImagePrefix,
       collectionId: collection.id,
-      image: collection.image,
-      staking_reward: collection.staking_reward,
-      nft_rarities: collection.nft_rarities,
-      rarity_multiplier: collection.rarity_multiplier,
+      image: collection.ipfsImagePrefix + "1.png",
       ownedNFTs: [] // Initialize the owned NFTs array
     }));
 
     for (let collection of collectionsList) {
       // Query for dynamic address
-      let query = Buffer.from(JSON.stringify({ owner_all_token_info: { owner: address } })).toString('base64');
+      let query = Buffer.from(JSON.stringify({ tokens: { owner: address } })).toString('base64');
+      await processQuery(query, collection);
+    }
+
+    collectionsList = json.map((collection: any) => ({
+      symbol: collection.symbol,
+      title: collection.title,
+      description: collection.description,
+      mintContract: collection.nftContract,
+      ipfsJSONPrefix: collection.ipfsJSONPrefix,
+      ipfsImagePrefix: collection.ipfsImagePrefix,
+      collectionId: collection.id,
+      image: collection.ipfsImagePrefix + "1.png",
+      ownedNFTs: [] // Initialize the owned NFTs array
+    }));
+
+    for (let collection of collectionsList) {
+      // Query for dynamic address
+      let query = Buffer.from(JSON.stringify({ tokens: { owner: address } })).toString('base64');
       await processQuery(query, collection);
     }
 
     async function processQuery(query: string, collection: any) {
-      const ownedNftsRes = await fetch(`https://terra-classic-lcd.publicnode.com/cosmwasm/wasm/v1/contract/${collection.collectionContract}/smart/${query}`);
+      const ownedNftsRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${collection.mintContract}/smart/${query}`);
       const ownedNftsJson = await ownedNftsRes.json();
 
-      if (ownedNftsJson && ownedNftsJson.data && Array.isArray(ownedNftsJson.data.data)) {
-        collection.ownedNFTs = ownedNftsJson.data.data;
+      if (ownedNftsJson && ownedNftsJson.data && Array.isArray(ownedNftsJson.data.tokens)) {
+        collection.ownedNFTs = ownedNftsJson.data.tokens;
 
-        for (const tokens of collection.ownedNFTs || []) {
+        for (const tokenId of collection.ownedNFTs || []) {
 
-          let token_Id = tokens.token_id 
-
-          let query2 = Buffer.from(JSON.stringify({ all_nft_info: { token_id: token_Id } })).toString('base64');
-          const ownedNftsRes2 = await fetch(`https://terra-classic-lcd.publicnode.com/cosmwasm/wasm/v1/contract/${collection.nftContract}/smart/${query2}`);
+          let query2 = Buffer.from(JSON.stringify({ all_nft_info: { token_id: tokenId, include_expired: true } })).toString('base64');
+          const ownedNftsRes2 = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${collection.mintContract}/smart/${query2}`);
           let nftJson = await ownedNftsRes2.json();
 
-          //const nftRes = await fetch(nftJson.data.info.token_uri);
-          //nftJson = await nftRes.json();
+          const nftRes = await fetch(nftJson.data.info.token_uri);
+          nftJson = await nftRes.json();
 
           if (nftJson) {
             tokenList.push({
-              tokenId :token_Id,
+              tokenId,
               creator: nftJson.creator || "Unknown",
               owner: address,
               tokenUri: "",
-              name: nftJson.data.info.extension.name || `NFT ${token_Id}`,
+              name: nftJson.name || `NFT ${tokenId}`,
               description: nftJson.description || "No description",
-              image: nftJson.data.info.extension.image,
+              image: nftJson.image,
               collection: {
-                name: `NFT ${token_Id}`, //collection.title,
+                name: collection.title,
                 symbol: collection.symbol,
-                contractAddress: collection.nftContract,
+                contractAddress: collection.mintContract,
                 creator: "",
                 description: "",
                 image: ""
