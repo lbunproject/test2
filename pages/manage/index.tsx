@@ -149,7 +149,7 @@ const IndexPage: React.FC = () => {
       })
     };
 
-    const totalGas = 3499999; //one transaction is cw20
+    const totalGas = 4499999; //one transaction is cw20
 
     tx([WrapperMsg], { gas: totalGas }, () => {
       router.push('/manage');
