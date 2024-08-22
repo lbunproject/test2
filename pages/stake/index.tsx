@@ -424,7 +424,7 @@ const Stake = () => {
     stakeMsgs.unshift(FeeMsg);
 
     // Calculate the total gas based on the number of selected NFTs
-    const totalGas = Math.ceil((stakeMsgs.length - 1)) * 3499999; //one transaction is cw20
+    const totalGas = Math.ceil((stakeMsgs.length + 1)) * 4499999; //one transaction is cw20
 
     //tx([FeeMsg], { gas: totalGas }, () => {
     tx(stakeMsgs, { gas: totalGas }, () => {
