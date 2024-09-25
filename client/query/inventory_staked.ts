@@ -68,6 +68,7 @@ export default async function queryStakedInventory(address: string) {
 
     // Fetch staked NFTs
     let query = Buffer.from(JSON.stringify({ get_stakings_by_owner: { owner: address } })).toString('base64');
+    //let query = Buffer.from(JSON.stringify({ get_stakings_by_owner: { owner: "terra1yplwrktw2u047nv9eupdjghef0t4a7zu4dmntt" } })).toString('base64');
     const stakedNftsRes = await fetch(`https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${stakeContractAddr}/smart/${query}`);
     const stakedNftsJson = await stakedNftsRes.json();
 
