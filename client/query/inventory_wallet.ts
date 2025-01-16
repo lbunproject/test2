@@ -9,6 +9,8 @@ type CollectionInfo = {
   ipfsJSONPrefix: string;
   ipfsImagePrefix: string;
   collectionId: number;
+  startToken: number;
+  endToken: number;
   image: string;
   ownedNFTs?: string[];
 };
@@ -111,6 +113,8 @@ export default async function queryWalletInventory(address: string) {
       ipfsJSONPrefix: collection.ipfsJSONPrefix,
       ipfsImagePrefix: collection.ipfsImagePrefix,
       collectionId: collection.id,
+      startToken: collection.startToken,
+      endToken: collection.endToken,
       image: collection.image,
       ownedNFTs: [], // Initialize the owned NFTs array
     }));
@@ -127,23 +131,37 @@ export default async function queryWalletInventory(address: string) {
             tokens: { owner: address, start_after: last_item.toString() },
           })
         ).toString("base64");
+
         const ownedNftsRes = await fetch(
           `https://lcd.miata-ipfs.com/cosmwasm/wasm/v1/contract/${collection.mintContract}/smart/${query}`
         );
+
         const ownedNftsJson = await ownedNftsRes.json();
+
+        //debug
+        //ownedNftsJson.data.tokens[0] = "402"
 
         if (
           ownedNftsJson &&
           ownedNftsJson.data &&
           Array.isArray(ownedNftsJson.data.tokens)
         ) {
-          // Add fetched tokens to collection's ownedNFTs
-          collection.ownedNFTs = collection.ownedNFTs.concat(
-            ownedNftsJson.data.tokens
-          );
+          // Filter tokens within the specified range
+          const filteredTokens = ownedNftsJson.data.tokens.filter((tokenStr: string) => {
+            const tokenNum = parseInt(tokenStr, 10);
+            if (isNaN(tokenNum)) {
+              console.warn(`Invalid token number: ${tokenStr}`);
+              return false; // Exclude invalid token numbers
+            }
+            return tokenNum >= collection.startToken && tokenNum <= collection.endToken;
+          });
 
-          // If the fetched tokens array is empty, we have reached the end of pagination
-          if (ownedNftsJson.data.tokens.length === 0) {
+          // Add filtered tokens to collection's ownedNFTs
+          collection.ownedNFTs = collection.ownedNFTs.concat(filteredTokens);
+          //break; //debug
+
+          // If no tokens were fetched or no tokens are within range, end pagination
+          if (ownedNftsJson.data.tokens.length === 0 || filteredTokens.length === 0) {
             break;
           }
 
@@ -222,7 +240,7 @@ export default async function queryWalletInventory(address: string) {
             collection: {
               name: collection.title
                 ? collection.title.includes(" NFT Collection")
-                  ? collection.title.replace("NFT Collection", "("+nftJson.creator+")")
+                  ? collection.title.replace("NFT Collection", "(" + nftJson.creator + ")")
                   : collection.title
                 : "No description",
               symbol: collection.symbol,

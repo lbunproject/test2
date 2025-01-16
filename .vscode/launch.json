@@ -4,18 +4,31 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+  
         {
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",
-            "url": "http://localhost:3000",
+            "url": "http://localhost:3001",
             "webRoot": "${workspaceFolder}",
             "userDataDir": false,
             "runtimeArgs": [
                 "--profile-directory=Default",
               ]
-
+  
             //"urlFilter": "http://localhost:4200/*",
-         }
+         },
+         {
+          "type": "chrome",
+          "request": "launch",
+          "name": "Launch Canary against localhost",
+          "url": "http://localhost:3000",
+          "webRoot": "${workspaceFolder}",
+          "userDataDir": false,
+          "runtimeExecutable": "C:\\Users\\Sofoli\\AppData\\Local\\Google\\Chrome SxS\\Application\\chrome.exe",
+          "runtimeArgs": [
+              "--profile-directory=Default"
+              ]
+          }
     ]
-}
+  }
