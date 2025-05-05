@@ -54,9 +54,6 @@ function customToast(
   return toast.custom(
     (t) => (
       <div
-        onLoad={() => {
-          setTimeout(() => toast.dismiss(t.id), 3000);
-        }}
         onClick={dismissable ? () => toast.dismiss(t.id) : () => {}}
         className={classNames(
           t.visible ? "animate-enter" : "animate-leave",
